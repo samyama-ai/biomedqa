@@ -1,0 +1,50 @@
+[
+  {
+    "id": "pr_001",
+    "category": "polypharmacy_risk",
+    "question": "What shared side effects do Acetylsalicylic acid and Warfarin have?",
+    "expected_tools": ["polypharmacy_risk"],
+    "expected_tool_args": {"drug1": "Acetylsalicylic acid", "drug2": "Warfarin"},
+    "cypher": "MATCH (d1:Drug {name: 'Acetylsalicylic acid'})-[:HAS_SIDE_EFFECT]->(se:SideEffect)<-[:HAS_SIDE_EFFECT]-(d2:Drug {name: 'Warfarin'}) RETURN se.name ORDER BY se.name LIMIT 10",
+    "expected_output_contains": ["Anaemia", "Dizziness"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "pr_002",
+    "category": "polypharmacy_risk",
+    "question": "Do Metformin and Rosiglitazone share gene targets?",
+    "expected_tools": ["interaction_checker"],
+    "expected_tool_args": {"drug1": "Metformin", "drug2": "Rosiglitazone"},
+    "cypher": "MATCH (d1:Drug {name: 'Metformin'})-[:INTERACTS_WITH_GENE]->(g:Gene)<-[:INTERACTS_WITH_GENE]-(d2:Drug {name: 'Rosiglitazone'}) RETURN g.gene_name",
+    "expected_output_contains": ["PPARG"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "pr_003",
+    "category": "polypharmacy_risk",
+    "question": "What is the polypharmacy risk between Ibuprofen and Naproxen — shared gene targets?",
+    "expected_tools": ["interaction_checker"],
+    "expected_tool_args": {"drug1": "Ibuprofen", "drug2": "Naproxen"},
+    "cypher": "MATCH (d1:Drug {name: 'Ibuprofen'})-[:INTERACTS_WITH_GENE]->(g:Gene)<-[:INTERACTS_WITH_GENE]-(d2:Drug {name: 'Naproxen'}) RETURN g.gene_name ORDER BY g.gene_name",
+    "expected_output_contains": ["PTGS1", "CYP2D6"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "pr_004",
+    "category": "polypharmacy_risk",
+    "question": "A patient is on Metformin, Warfarin, and Lisinopril. Which pairs share gene targets?",
+    "expected_tools": ["interaction_checker"],
+    "expected_tool_args": {},
+    "cypher": "MATCH (d1:Drug)-[:INTERACTS_WITH_GENE]->(g:Gene)<-[:INTERACTS_WITH_GENE]-(d2:Drug) WHERE d1.name IN ['Metformin', 'Warfarin', 'Lisinopril'] AND d2.name IN ['Metformin', 'Warfarin', 'Lisinopril'] AND d1.name < d2.name RETURN d1.name, d2.name, g.gene_name",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "hard"
+  }
+]

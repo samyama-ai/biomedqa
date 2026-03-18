@@ -1,0 +1,50 @@
+[
+  {
+    "id": "ae_001",
+    "category": "adverse_events",
+    "question": "Which drugs have the most side effects in the database?",
+    "expected_tools": ["drug_side_effects"],
+    "expected_tool_args": {},
+    "cypher": "MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect) RETURN d.name, count(se) AS se_count ORDER BY se_count DESC LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "ae_002",
+    "category": "adverse_events",
+    "question": "Compare the side effect profiles of Acetylsalicylic acid and Warfarin — what effects are shared?",
+    "expected_tools": ["polypharmacy_risk"],
+    "expected_tool_args": {"drug1": "Acetylsalicylic acid", "drug2": "Warfarin"},
+    "cypher": "MATCH (d1:Drug {name: 'Acetylsalicylic acid'})-[:HAS_SIDE_EFFECT]->(se:SideEffect)<-[:HAS_SIDE_EFFECT]-(d2:Drug {name: 'Warfarin'}) RETURN se.name ORDER BY se.name LIMIT 10",
+    "expected_output_contains": ["Anaemia"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "ae_003",
+    "category": "adverse_events",
+    "question": "Which drugs have Dizziness as a side effect?",
+    "expected_tools": ["side_effect_drugs"],
+    "expected_tool_args": {"side_effect": "Dizziness"},
+    "cypher": "MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect {name: 'Dizziness'}) RETURN d.name ORDER BY d.name LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "ae_004",
+    "category": "adverse_events",
+    "question": "For drugs targeting PTGS1, what are their most common side effects?",
+    "expected_tools": ["gene_drugs", "drug_side_effects"],
+    "expected_tool_args": {"gene_name": "PTGS1"},
+    "cypher": "MATCH (d:Drug)-[:INTERACTS_WITH_GENE]->(g:Gene {gene_name: 'PTGS1'}) MATCH (d)-[:HAS_SIDE_EFFECT]->(se:SideEffect) RETURN se.name, count(d) AS drug_count ORDER BY drug_count DESC LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "hard"
+  }
+]

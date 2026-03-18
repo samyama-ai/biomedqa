@@ -1,0 +1,74 @@
+[
+  {
+    "id": "se_001",
+    "category": "side_effects",
+    "question": "What are the known side effects of Acetylsalicylic acid?",
+    "expected_tools": ["drug_side_effects"],
+    "expected_tool_args": {"drug_name": "Acetylsalicylic acid"},
+    "cypher": "MATCH (d:Drug {name: 'Acetylsalicylic acid'})-[:HAS_SIDE_EFFECT]->(se:SideEffect) RETURN se.name ORDER BY se.name LIMIT 10",
+    "expected_output_contains": ["Anaemia", "Asthma"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "se_002",
+    "category": "side_effects",
+    "question": "Which drugs have Nausea as a side effect?",
+    "expected_tools": ["side_effect_drugs"],
+    "expected_tool_args": {"side_effect": "Nausea"},
+    "cypher": "MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect {name: 'Nausea'}) RETURN d.name ORDER BY d.name LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "se_003",
+    "category": "side_effects",
+    "question": "What are the approved indications for Metformin?",
+    "expected_tools": ["drug_indications"],
+    "expected_tool_args": {"drug_name": "Metformin"},
+    "cypher": "MATCH (d:Drug {name: 'Metformin'})-[:HAS_INDICATION]->(ind:Indication) RETURN ind.name ORDER BY ind.name LIMIT 10",
+    "expected_output_contains": ["Diabetes mellitus"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "se_004",
+    "category": "side_effects",
+    "question": "Do Acetylsalicylic acid and Metformin share any side effects?",
+    "expected_tools": ["polypharmacy_risk"],
+    "expected_tool_args": {"drug1": "Acetylsalicylic acid", "drug2": "Metformin"},
+    "cypher": "MATCH (d1:Drug {name: 'Acetylsalicylic acid'})-[:HAS_SIDE_EFFECT]->(se:SideEffect)<-[:HAS_SIDE_EFFECT]-(d2:Drug {name: 'Metformin'}) RETURN se.name ORDER BY se.name LIMIT 10",
+    "expected_output_contains": ["Dizziness"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "se_005",
+    "category": "side_effects",
+    "question": "How many side effects does Warfarin have?",
+    "expected_tools": ["drug_side_effects"],
+    "expected_tool_args": {"drug_name": "Warfarin"},
+    "cypher": "MATCH (d:Drug {name: 'Warfarin'})-[:HAS_SIDE_EFFECT]->(se:SideEffect) RETURN count(se) AS se_count",
+    "expected_output_contains": [],
+    "answer_type": "count",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "se_006",
+    "category": "side_effects",
+    "question": "What are the indications for drugs that also cause Anaemia as a side effect?",
+    "expected_tools": ["side_effect_drugs", "drug_indications"],
+    "expected_tool_args": {"side_effect": "Anaemia"},
+    "cypher": "MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect {name: 'Anaemia'}) MATCH (d)-[:HAS_INDICATION]->(ind:Indication) RETURN d.name, ind.name ORDER BY d.name LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions"],
+    "difficulty": "hard"
+  }
+]

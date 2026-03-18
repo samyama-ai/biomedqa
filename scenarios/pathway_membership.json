@@ -1,0 +1,74 @@
+[
+  {
+    "id": "pw_001",
+    "category": "pathway_membership",
+    "question": "What pathways does the TP53 protein (UniProt P04637) participate in?",
+    "expected_tools": ["protein_pathways"],
+    "expected_tool_args": {"uniprot_id": "P04637"},
+    "cypher": "MATCH (p:Protein {uniprot_id: 'P04637'})-[:PARTICIPATES_IN]->(pw:Pathway) RETURN pw.name ORDER BY pw.name LIMIT 10",
+    "expected_output_contains": ["Apoptosis"],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "pw_002",
+    "category": "pathway_membership",
+    "question": "Which proteins participate in the Apoptosis pathway?",
+    "expected_tools": ["pathway_members"],
+    "expected_tool_args": {"pathway_name": "Apoptosis"},
+    "cypher": "MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway {name: 'Apoptosis'}) RETURN count(p) AS protein_count",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "easy"
+  },
+  {
+    "id": "pw_003",
+    "category": "pathway_membership",
+    "question": "What are the protein-protein interaction partners of TP53 (UniProt Q9UQ61)?",
+    "expected_tools": ["interaction_partners"],
+    "expected_tool_args": {"uniprot_id": "Q9UQ61"},
+    "cypher": "MATCH (p1:Protein {uniprot_id: 'Q9UQ61'})-[i:INTERACTS_WITH]-(p2:Protein) RETURN p2.uniprot_id ORDER BY p2.uniprot_id LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "pw_004",
+    "category": "pathway_membership",
+    "question": "Do TP53 (P04637) and BRCA1 (P38398) share any pathways?",
+    "expected_tools": ["shared_pathways"],
+    "expected_tool_args": {"uniprot1": "P04637", "uniprot2": "P38398"},
+    "cypher": "MATCH (a:Protein {uniprot_id: 'P04637'})-[:PARTICIPATES_IN]->(pw:Pathway)<-[:PARTICIPATES_IN]-(b:Protein {uniprot_id: 'P38398'}) RETURN pw.name ORDER BY pw.name LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "pw_005",
+    "category": "pathway_membership",
+    "question": "What pathways are connected to the Cell Cycle pathway through shared proteins?",
+    "expected_tools": ["pathway_crosstalk"],
+    "expected_tool_args": {"pathway_name": "Cell Cycle"},
+    "cypher": "MATCH (pw1:Pathway {name: 'Cell Cycle'})<-[:PARTICIPATES_IN]-(p:Protein)-[:PARTICIPATES_IN]->(pw2:Pathway) WHERE pw2.name <> pw1.name RETURN pw2.name, count(p) AS shared ORDER BY shared DESC LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "pw_006",
+    "category": "pathway_membership",
+    "question": "What GO terms are associated with proteins in the Apoptosis pathway?",
+    "expected_tools": ["go_enrichment"],
+    "expected_tool_args": {"pathway_name": "Apoptosis"},
+    "cypher": "MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway {name: 'Apoptosis'}) MATCH (p)-[:ANNOTATED_WITH]->(go:GOTerm) RETURN go.name, count(p) AS protein_count ORDER BY protein_count DESC LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "medium"
+  }
+]

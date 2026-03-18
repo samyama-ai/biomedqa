@@ -1,0 +1,98 @@
+[
+  {
+    "id": "xkg_001",
+    "category": "cross_kg_federation",
+    "question": "What clinical trials test Metformin?",
+    "expected_tools": ["drug_interactions"],
+    "expected_tool_args": {"drug_name": "Metformin"},
+    "cypher": "MATCH (d:Drug {name: 'Metformin'}) MATCH (i:Intervention)<-[:TESTS]-(ct:ClinicalTrial) WHERE i.name = d.name RETURN ct.nct_id, ct.phase LIMIT 5",
+    "expected_output_contains": ["NCT"],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions", "clinicaltrials"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "xkg_002",
+    "category": "cross_kg_federation",
+    "question": "What biological pathways do Metformin's gene targets participate in?",
+    "expected_tools": ["drug_interactions", "protein_pathways"],
+    "expected_tool_args": {"drug_name": "Metformin"},
+    "cypher": "MATCH (d:Drug {name: 'Metformin'})-[:INTERACTS_WITH_GENE]->(g:Gene) MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = g.gene_name RETURN g.gene_name, pw.name LIMIT 5",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions", "pathways"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "xkg_003",
+    "category": "cross_kg_federation",
+    "question": "What pathways are affected by Warfarin through its gene targets?",
+    "expected_tools": ["drug_interactions", "protein_pathways"],
+    "expected_tool_args": {"drug_name": "Warfarin"},
+    "cypher": "MATCH (d:Drug {name: 'Warfarin'})-[:INTERACTS_WITH_GENE]->(g:Gene) MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = g.gene_name RETURN g.gene_name, pw.name LIMIT 5",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions", "pathways"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "xkg_004",
+    "category": "cross_kg_federation",
+    "question": "How many clinical trials study Breast Cancer?",
+    "expected_tools": [],
+    "expected_tool_args": {},
+    "cypher": "MATCH (ct:ClinicalTrial)-[:STUDIES]->(c:Condition) WHERE c.name CONTAINS 'Breast' RETURN c.name, count(ct) AS trials ORDER BY trials DESC LIMIT 5",
+    "expected_output_contains": ["Breast Cancer"],
+    "answer_type": "list",
+    "kgs_required": ["clinicaltrials"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "xkg_005",
+    "category": "cross_kg_federation",
+    "question": "What adverse events were reported in trial NCT00835861?",
+    "expected_tools": [],
+    "expected_tool_args": {},
+    "cypher": "MATCH (ct:ClinicalTrial {nct_id: 'NCT00835861'})-[:REPORTED]->(ae:AdverseEvent) RETURN ae.term LIMIT 10",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["clinicaltrials"],
+    "difficulty": "medium"
+  },
+  {
+    "id": "xkg_006",
+    "category": "cross_kg_federation",
+    "question": "For drugs indicated for diabetes, what pathways do their gene targets participate in?",
+    "expected_tools": ["drug_indications", "drug_interactions", "protein_pathways"],
+    "expected_tool_args": {},
+    "cypher": "MATCH (d:Drug)-[:HAS_INDICATION]->(ind:Indication) WHERE ind.name CONTAINS 'Diabetes' MATCH (d)-[:INTERACTS_WITH_GENE]->(g:Gene) MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = g.gene_name RETURN d.name, g.gene_name, pw.name LIMIT 5",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions", "pathways"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "xkg_007",
+    "category": "cross_kg_federation",
+    "question": "What conditions are studied in clinical trials that test Warfarin?",
+    "expected_tools": [],
+    "expected_tool_args": {},
+    "cypher": "MATCH (d:Drug {name: 'Warfarin'}) MATCH (i:Intervention)<-[:TESTS]-(ct:ClinicalTrial)-[:STUDIES]->(c:Condition) WHERE i.name = d.name RETURN c.name, count(ct) AS trials ORDER BY trials DESC LIMIT 5",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["druginteractions", "clinicaltrials"],
+    "difficulty": "hard"
+  },
+  {
+    "id": "xkg_008",
+    "category": "cross_kg_federation",
+    "question": "Which proteins interact with TP53 in the STRING network and what pathways do they share?",
+    "expected_tools": ["interaction_partners", "shared_pathways"],
+    "expected_tool_args": {},
+    "cypher": "MATCH (p1:Protein {uniprot_id: 'P04637'})-[:PARTICIPATES_IN]->(pw:Pathway)<-[:PARTICIPATES_IN]-(p2:Protein)-[:INTERACTS_WITH]-(p1) RETURN p2.uniprot_id, pw.name LIMIT 5",
+    "expected_output_contains": [],
+    "answer_type": "list",
+    "kgs_required": ["pathways"],
+    "difficulty": "hard"
+  }
+]
