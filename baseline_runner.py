@@ -81,12 +81,12 @@ def load_scenarios() -> list[dict]:
     return scenarios
 
 
-def run_cypher_http(url: str, cypher: str) -> tuple[list[dict], float]:
+def run_cypher_http(url: str, cypher: str, tenant: str = "default") -> tuple[list[dict], float]:
     t0 = time.time()
     try:
         resp = requests.post(
             f"{url.rstrip('/')}/api/query",
-            json={"query": cypher}, timeout=30,
+            json={"query": cypher, "tenant": tenant}, timeout=30,
         )
         latency = (time.time() - t0) * 1000
         data = resp.json()
@@ -166,41 +166,41 @@ def run_standalone(client: OpenAI, scenarios: list[dict]) -> list[dict]:
 
 # ── Text-to-Cypher ──────────────────────────────────────────────────────
 
-def run_text_to_cypher(client: OpenAI, url: str, scenarios: list[dict]) -> list[dict]:
-    """GPT-4 generates Cypher, Samyama executes."""
+def run_text_to_cypher(client: OpenAI, url: str, scenarios: list[dict],
+                       tenant: str = "default") -> list[dict]:
+    """Text-to-Cypher via Samyama NLQ endpoint (schema-aware, per-tenant config).
+
+    If tenant has NLQ configured, uses POST /api/nlq which has full schema access.
+    Falls back to raw OpenAI if NLQ endpoint is not available.
+    """
     results = []
+    use_nlq = _check_nlq_available(url, tenant)
+    if use_nlq:
+        print(f"  Using NLQ endpoint (tenant={tenant}, schema-aware)")
+    else:
+        print(f"  NLQ not available, falling back to raw OpenAI")
+
     for s in scenarios:
         t0 = time.time()
         try:
-            resp = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content":
-                        "You are a Cypher query expert. Given a graph database schema and a question, "
-                        "generate ONLY the Cypher query. No explanation, no markdown fences.\n\n"
-                        f"SCHEMA:\n{SCHEMA_SUMMARY}\n\n"
-                        f"EXAMPLES:\n{FEW_SHOT_EXAMPLES}"},
-                    {"role": "user", "content": s["question"]},
-                ],
-                max_tokens=300,
-                temperature=0,
-            )
-            gen_latency = (time.time() - t0) * 1000
-            cypher = resp.choices[0].message.content.strip()
-            tokens = resp.usage.total_tokens
-
-            # Clean up — remove markdown fences if any
-            cypher = cypher.replace("```cypher", "").replace("```", "").strip()
-
-            # Execute generated Cypher
-            rows, exec_latency = run_cypher_http(url, cypher)
-            total_latency = gen_latency + exec_latency
-            ev = evaluate_result(s, rows)
+            if use_nlq:
+                # Use Samyama NLQ endpoint — has full schema, already executes query
+                cypher, rows, tokens = _nlq_generate_and_execute(url, tenant, s["question"])
+                total_latency = (time.time() - t0) * 1000
+                ev = evaluate_result(s, rows)
+            else:
+                # Fallback: raw OpenAI with schema summary
+                cypher, tokens = _openai_generate(client, s["question"])
+                gen_latency = (time.time() - t0) * 1000
+                cypher = cypher.replace("```cypher", "").replace("```", "").strip()
+                rows, exec_latency = run_cypher_http(url, cypher, tenant)
+                total_latency = gen_latency + exec_latency
+                ev = evaluate_result(s, rows)
 
         except Exception as exc:
             total_latency = (time.time() - t0) * 1000
             tokens = 0
-            cypher = ""
+            cypher = str(exc)
             ev = {"passed": False, "missing": ["error: " + str(exc)]}
 
         status = "PASS" if ev["passed"] else "FAIL"
@@ -216,6 +216,63 @@ def run_text_to_cypher(client: OpenAI, url: str, scenarios: list[dict]) -> list[
             "missing": ev.get("missing", []),
         })
     return results
+
+
+def _check_nlq_available(url: str, tenant: str) -> bool:
+    """Check if NLQ endpoint is available for this tenant."""
+    try:
+        resp = requests.post(
+            f"{url.rstrip('/')}/api/nlq",
+            json={"question": "test", "graph": tenant},
+            timeout=10,
+        )
+        # If we get a response (even an error), NLQ endpoint exists
+        return resp.status_code != 404
+    except Exception:
+        return False
+
+
+def _nlq_generate_and_execute(url: str, tenant: str, question: str) -> tuple[str, list[dict], int]:
+    """Generate and execute Cypher via Samyama NLQ endpoint.
+
+    The NLQ endpoint generates Cypher AND executes it, returning both.
+    """
+    resp = requests.post(
+        f"{url.rstrip('/')}/api/nlq",
+        json={"question": question, "graph": tenant},
+        timeout=60,
+    )
+    data = resp.json()
+    cypher = data.get("generated_cypher", "")
+    tokens = data.get("tokens_used", 0)
+
+    # Extract results (NLQ endpoint already executed the query)
+    results_data = data.get("results", {})
+    columns = results_data.get("columns", [])
+    records = results_data.get("records", [])
+    rows = [dict(zip(columns, row)) for row in records]
+
+    return cypher, rows, tokens
+
+
+def _openai_generate(client: OpenAI, question: str) -> tuple[str, int]:
+    """Generate Cypher via raw OpenAI (fallback)."""
+    resp = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content":
+                "You are a Cypher query expert. Given a graph database schema and a question, "
+                "generate ONLY the Cypher query. No explanation, no markdown fences.\n\n"
+                f"SCHEMA:\n{SCHEMA_SUMMARY}\n\n"
+                f"EXAMPLES:\n{FEW_SHOT_EXAMPLES}"},
+            {"role": "user", "content": question},
+        ],
+        max_tokens=300,
+        temperature=0,
+    )
+    cypher = resp.choices[0].message.content.strip()
+    tokens = resp.usage.total_tokens
+    return cypher, tokens
 
 
 def print_summary(results: list[dict], approach: str):
@@ -236,6 +293,7 @@ def main():
                         default="both")
     parser.add_argument("--output", default=None)
     parser.add_argument("--api-key", default=None, help="OpenAI API key (or set OPENAI_API_KEY)")
+    parser.add_argument("--tenant", default="default", help="Samyama tenant for NLQ queries")
     args = parser.parse_args()
 
     api_key = args.api_key or os.environ.get("OPENAI_API_KEY")
@@ -257,7 +315,7 @@ def main():
 
     if args.mode in ("text-to-cypher", "both"):
         print("\n=== Text-to-Cypher ===\n")
-        t2c = run_text_to_cypher(client, args.url, scenarios)
+        t2c = run_text_to_cypher(client, args.url, scenarios, tenant=args.tenant)
         print_summary(t2c, "Text-to-Cypher")
         all_results.extend(t2c)
 
