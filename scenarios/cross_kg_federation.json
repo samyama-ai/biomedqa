@@ -65,7 +65,7 @@
     "question": "For drugs indicated for diabetes, what pathways do their gene targets participate in?",
     "expected_tools": ["drug_indications", "drug_interactions", "protein_pathways"],
     "expected_tool_args": {},
-    "cypher": "MATCH (d:Drug)-[:HAS_INDICATION]->(ind:Indication) WHERE ind.name CONTAINS 'Diabetes' MATCH (d)-[:INTERACTS_WITH_GENE]->(g:Gene) MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = g.gene_name RETURN d.name, g.gene_name, pw.name LIMIT 5",
+    "cypher": "MATCH (d:Drug)-[:HAS_INDICATION]->(ind:Indication) WHERE ind.name CONTAINS 'Diabetes' MATCH (d)-[:INTERACTS_WITH_GENE]->(g:Gene) WITH DISTINCT g.gene_name AS gene LIMIT 20 MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = gene RETURN gene, pw.name LIMIT 5",
     "expected_output_contains": [],
     "answer_type": "list",
     "kgs_required": ["druginteractions", "pathways"],
@@ -77,22 +77,22 @@
     "question": "What conditions are studied in clinical trials that test Warfarin?",
     "expected_tools": [],
     "expected_tool_args": {},
-    "cypher": "MATCH (d:Drug {name: 'Warfarin'}) MATCH (i:Intervention)<-[:TESTS]-(ct:ClinicalTrial)-[:STUDIES]->(c:Condition) WHERE i.name = d.name RETURN c.name, count(ct) AS trials ORDER BY trials DESC LIMIT 5",
+    "cypher": "MATCH (i:Intervention)<-[:TESTS]-(ct:ClinicalTrial) WHERE i.name CONTAINS 'Warfarin' MATCH (ct)-[:STUDIES]->(c:Condition) RETURN c.name, count(ct) AS trials ORDER BY trials DESC LIMIT 5",
     "expected_output_contains": [],
     "answer_type": "list",
-    "kgs_required": ["druginteractions", "clinicaltrials"],
+    "kgs_required": ["clinicaltrials"],
     "difficulty": "hard"
   },
   {
     "id": "xkg_008",
     "category": "cross_kg_federation",
-    "question": "Which proteins interact with TP53 in the STRING network and what pathways do they share?",
-    "expected_tools": ["interaction_partners", "shared_pathways"],
-    "expected_tool_args": {},
-    "cypher": "MATCH (p1:Protein {uniprot_id: 'P04637'})-[:PARTICIPATES_IN]->(pw:Pathway)<-[:PARTICIPATES_IN]-(p2:Protein)-[:INTERACTS_WITH]-(p1) RETURN p2.uniprot_id, pw.name LIMIT 5",
+    "question": "For Acetylsalicylic acid, what pathways do its gene targets participate in?",
+    "expected_tools": ["drug_interactions", "protein_pathways"],
+    "expected_tool_args": {"drug_name": "Acetylsalicylic acid"},
+    "cypher": "MATCH (d:Drug {name: 'Acetylsalicylic acid'})-[:INTERACTS_WITH_GENE]->(g:Gene) WITH DISTINCT g.gene_name AS gene LIMIT 20 MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = gene RETURN gene, pw.name LIMIT 5",
     "expected_output_contains": [],
     "answer_type": "list",
-    "kgs_required": ["pathways"],
+    "kgs_required": ["druginteractions", "pathways"],
     "difficulty": "hard"
   }
 ]
