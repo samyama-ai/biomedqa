@@ -95,32 +95,34 @@ Expected output:
 Total:    40
 Passed:   39 (98%)
 Failed:   1
-Avg lat:  651 ms
+Avg lat:  920 ms
 
 Category                    Pass  Total    Pct   Avg ms
 ───────────────────────────────────────────────────────
-  adverse_events              4     4   100%  1043
-  cross_kg_federation         8     8   100%  1446
-  drug_classification         4     4   100%    96
-  drug_interactions           8     8   100%    92
-  pathway_membership          6     6   100%   772
-  polypharmacy_risk           3     4    75%    90
-  side_effects                6     6   100%   699
+  adverse_events              4     4   100%  1049
+  cross_kg_federation         8     8   100%  2199
+  drug_classification         4     4   100%    98
+  drug_interactions           8     8   100%    93
+  pathway_membership          6     6   100%   792
+  polypharmacy_risk           3     4    75%   158
+  side_effects                6     6   100%   692
 ```
 
-The single failure (pr_004) is a correct empty result — the 3 queried drugs genuinely share no gene targets.
+The single failure (pr_004) is a correct empty result — the queried drugs genuinely share no gene targets.
 
 ---
 
-## 2. Run Text-to-Cypher Baseline (0% expected)
+## 2. Run Text-to-Cypher Baseline (85% expected)
+
+Requires a tenant with NLQ configured (see Step 0.3 in setup_tenant.sh):
 
 ```bash
 OPENAI_API_KEY='sk-proj-...' \
-python3 baseline_runner.py --url http://localhost:8080 --mode text-to-cypher \
+python3 baseline_runner.py --url http://localhost:8080 --tenant biomedqa --mode text-to-cypher \
   --output ~/samyama/results_t2c.json
 ```
 
-GPT-4o generates syntactically valid Cypher that silently returns empty results.
+Uses Samyama's NLQ endpoint with schema-aware system prompt. 6 failures: 3 schema hallucinations, 1 exact-vs-CONTAINS, 1 inline property variable, 1 correct empty.
 
 ---
 
@@ -200,8 +202,8 @@ All numbers verified across 4 independent fresh-load runs:
 | Combined nodes | 7,925,858 | Exact |
 | Combined edges | 28,000,752 | Exact |
 | MCP accuracy | 39/40 (98%) | 4 runs |
-| MCP avg latency | 647-660ms | Variance |
-| Text-to-Cypher accuracy | 0/40 (0%) | 1 run |
+| MCP avg latency | 920ms | Variance |
+| Text-to-Cypher (NLQ) accuracy | 34/40 (85%) | 1 run (schema-aware) |
 | GPT-4o standalone accuracy | 30/40 (75%) | 1 run |
 | Pathways load time | 3.4-3.6s | Variance |
 | Drug Interactions load time | 0.7-0.8s | Variance |

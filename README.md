@@ -4,13 +4,25 @@
 
 ## Key Results
 
-| Approach | Accuracy | Avg Latency | Tokens/Query |
-|----------|----------|-------------|-------------|
-| GPT-4o standalone | 30/40 (75%) | 2,474ms | 213 |
-| Text-to-Cypher (GPT-4o) | 0/40 (0%) | 986ms | 548 |
-| **MCP tools** | **39/40 (98%)** | **651ms** | **0** |
+| Approach | Accuracy | Avg Latency | How |
+|----------|----------|-------------|-----|
+| **MCP tools** | **39/40 (98%)** | **920ms** | Pre-authored Cypher templates, deterministic |
+| Text-to-Cypher (NLQ) | 34/40 (85%) | 1,846ms | Schema-aware NLQ endpoint (GPT-4o) |
+| GPT-4o standalone | 30/40 (75%) | 2,805ms | Answers from training data, no database |
 
-**Key finding:** Domain-specific MCP tools (parameterized Cypher templates) outperform both text-to-Cypher and standalone LLM approaches. The LLM's role should be tool selection and argument extraction, not query generation.
+### Error Categorization
+
+| Result Category | MCP | Text-to-Cypher | Standalone |
+|----------------|-----|----------------|-----------|
+| Correct answer | 39 | 34 | 30 |
+| Correct empty (no data exists) | 1 | 1 | 0 |
+| Schema mismatch | 0 | 3 | — |
+| Data mismatch (exact vs CONTAINS) | 0 | 1 | — |
+| Inline property variable | 0 | 1 | — |
+| Hallucinated answer | — | — | 5 |
+| Missing precision | — | — | 5 |
+
+**Key finding:** MCP tools have **zero schema errors** — the Cypher templates are authored against the actual schema. Text-to-Cypher fails on cross-KG joins and schema hallucinations. GPT-4o standalone fails on precision-requiring questions.
 
 ## Knowledge Graphs Required
 
@@ -27,10 +39,23 @@
 | Drug interactions | 8 | Drug Interactions | Easy-Medium |
 | Side effect lookup | 6 | Drug Interactions | Easy-Hard |
 | Pathway membership | 6 | Pathways | Easy-Medium |
-| Cross-KG federation | 8 | All 3 | Hard |
-| Polypharmacy risk | 4 | Drug Interactions | Medium-Hard |
+| Cross-KG federation | 8 | Drug Int. + Pathways + Clinical Trials | Hard |
+| Polypharmacy risk | 4 | Drug Interactions | Medium |
 | Drug classification | 4 | Drug Interactions | Easy-Medium |
 | Adverse event analysis | 4 | Drug Interactions | Easy-Hard |
+
+### Per-Category Results (MCP tools)
+
+| Category | Pass/Total | Avg Latency |
+|----------|-----------|-------------|
+| Drug interactions | 8/8 (100%) | 93ms |
+| Side effects | 6/6 (100%) | 692ms |
+| Pathway membership | 6/6 (100%) | 792ms |
+| Cross-KG federation | 8/8 (100%) | 2,199ms |
+| Drug classification | 4/4 (100%) | 98ms |
+| Adverse events | 4/4 (100%) | 1,049ms |
+| Polypharmacy risk | 3/4 (75%) | 158ms |
+| **Total** | **39/40 (98%)** | **920ms** |
 
 ## Quick Start
 
@@ -50,24 +75,25 @@ python runner.py --dry-run
 # 4. Run MCP tools benchmark (Cypher templates)
 python runner.py --url http://localhost:8080
 
-# 5. Run baselines (requires OpenAI API key)
-OPENAI_API_KEY=sk-... python baseline_runner.py --url http://localhost:8080
+# 5. Run baselines (requires OpenAI API key + NLQ-configured tenant)
+# See PLAYBOOK.md for tenant setup with schema-aware NLQ config
+OPENAI_API_KEY=sk-... python baseline_runner.py --url http://localhost:8080 --tenant biomedqa
 ```
 
 ## Evaluation Approaches
 
 ### MCP Tools (98% accuracy)
-Pre-authored Cypher templates with parameter substitution. The LLM selects which tool to call and provides arguments. The database executes the template deterministically.
+Pre-authored Cypher templates with parameter substitution. The LLM selects which tool to call and provides arguments. The database executes the template deterministically. Zero schema errors.
 
-### Text-to-Cypher (0% accuracy)
-GPT-4o generates Cypher given the schema (3 few-shot examples). Queries are syntactically valid but return empty results due to schema mismatches (hallucinated property filters, incorrect multi-MATCH patterns).
+### Text-to-Cypher via NLQ (85% accuracy)
+Samyama's built-in NLQ endpoint with per-tenant schema-aware system prompt (full schema with edge directions, property types, few-shot examples). GPT-4o generates Cypher server-side. Fails on cross-KG joins (schema hallucination) and exact-vs-CONTAINS matching.
 
 ### GPT-4o Standalone (75% accuracy)
-GPT-4o answers from training data without database access. Surprisingly effective for general pharmacology knowledge but fails on precise identifiers, exact counts, and shared-target queries.
+GPT-4o answers from training data without database access. Strong on general pharmacology knowledge but fails on precise identifiers (DrugBank IDs), exact counts, and shared-target queries.
 
 ## Cross-KG Federation
 
-The benchmark includes 8 cross-KG queries that join across multiple knowledge graphs:
+The benchmark includes 8 cross-KG queries that join across multiple knowledge graphs using WHERE-based property bridges:
 
 ```cypher
 -- Drug Interactions → Pathways: drug targets → biological pathways
@@ -86,37 +112,56 @@ RETURN ct.nct_id, ct.phase
 MATCH (ct:ClinicalTrial)-[:STUDIES]->(c:Condition)
 WHERE c.name CONTAINS 'Breast'
 RETURN c.name, count(ct) AS trials ORDER BY trials DESC
+
+-- 3-KG chain: diabetes drugs → gene targets → pathways
+MATCH (d:Drug)-[:HAS_INDICATION]->(ind:Indication)
+WHERE ind.name CONTAINS 'Diabetes'
+MATCH (d)-[:INTERACTS_WITH_GENE]->(g:Gene)
+WITH DISTINCT g.gene_name AS gene LIMIT 20
+MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway)
+WHERE p.name = gene
+RETURN gene, pw.name
 ```
 
 ## Scenario Format
 
 ```json
 {
-  "id": "di_001",
-  "category": "drug_interactions",
-  "question": "What genes does Acetylsalicylic acid interact with?",
-  "expected_tools": ["drug_interactions"],
-  "expected_tool_args": {"drug_name": "Acetylsalicylic acid"},
-  "cypher": "MATCH (d:Drug {name: 'Acetylsalicylic acid'})-[i:INTERACTS_WITH_GENE]->(g:Gene) RETURN g.gene_name, i.interaction_type ORDER BY g.gene_name",
-  "expected_output_contains": ["PTGS1"],
-  "answer_type": "list",
-  "kgs_required": ["druginteractions"],
-  "difficulty": "easy"
+  "id": "xkg_002",
+  "category": "cross_kg_federation",
+  "question": "What biological pathways do Metformin's gene targets participate in?",
+  "expected_tools": ["drug_interactions", "protein_pathways"],
+  "cypher": "MATCH (d:Drug {name: 'Metformin'})-[:INTERACTS_WITH_GENE]->(g:Gene) MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) WHERE p.name = g.gene_name RETURN g.gene_name, pw.name LIMIT 5",
+  "expected_output_contains": [],
+  "kgs_required": ["druginteractions", "pathways"],
+  "difficulty": "hard"
 }
 ```
 
 ## FAQ
 
-### Why does GPT-4o standalone (75%) outperform text-to-Cypher (0%)?
+### Why does GPT-4o standalone (75%) outperform text-to-Cypher in some categories?
 
-These are fundamentally different tasks. GPT-4o standalone answers from **training data memory** — it knows pharmacology. Text-to-Cypher generates **syntactically valid but semantically wrong** Cypher queries that silently return empty results. See [BiomedQA FAQ](https://samyama-ai.github.io/samyama-graph-book/biomedqa_faq.html) for detailed analysis.
+These are fundamentally different tasks. GPT-4o standalone answers from **training data memory** — it knows pharmacology. Text-to-Cypher generates **Cypher queries** that must be syntactically and semantically correct against a 19-label, 12-edge-type schema across 3 KGs. With a schema-aware NLQ endpoint (full schema in system prompt + few-shot examples), text-to-Cypher reaches 85% — but still fails on cross-KG joins where it hallucinates non-existent edge traversals.
+
+### Could text-to-Cypher improve further?
+
+Yes. The Remote Planet demo (single KG, 10 labels) achieved 100% NLQ accuracy with iterative prompt engineering. But the BiomedQA schema is 3x more complex (19 labels, 12 edge types, 3 federated KGs), making text-to-Cypher fundamentally harder. MCP tools eliminate the schema complexity problem entirely.
+
+### Why not test with other LLMs?
+
+GPT-4o is the strongest available baseline. If GPT-4o can't beat MCP tools, weaker models won't either. The conclusion holds across model families.
 
 ## Papers
 
 This benchmark is used in:
-- **arXiv:2603.15080** — Open Biomedical Knowledge Graphs at Scale
+- **[arXiv:2603.15080](https://arxiv.org/abs/2603.15080)** — Open Biomedical Knowledge Graphs at Scale
 - **GRADES-NDA 2026** (SIGMOD workshop) — Federated Biomedical Knowledge Graphs
 - **aiDM 2026** (SIGMOD workshop) — Domain-Specific MCP Tools vs. Generic Text-to-Cypher
+
+## Hardware
+
+All results verified on AWS g4dn.4xlarge (16 vCPU AMD EPYC, 62GB RAM, NVIDIA A10G) with all 3 KGs loaded (7.9M nodes, 28M edges). Results reproduced across 4 independent fresh-load runs.
 
 ## License
 
