@@ -1,6 +1,6 @@
 # BiomedQA Benchmark
 
-40 pharmacology questions over three federated biomedical knowledge graphs, designed to evaluate AI agent approaches for domain-specific data access.
+40 pharmacology questions over three independently built biomedical knowledge graphs, merged into a single store, designed to evaluate AI agent approaches for domain-specific data access.
 
 > Part of the **Samyama** ecosystem — exercises three biomedical KGs via the graph engine at [samyama-ai/samyama-graph](https://github.com/samyama-ai/samyama-graph).
 > Benchmark framework + ground-truth set; the underlying KG data lives in [pubmed-kg](https://github.com/samyama-ai/pubmed-kg), [clinicaltrials-kg](https://git.samyama.ai/Samyama.ai/clinicaltrials-kg), and [druginteractions-kg](https://git.samyama.ai/Samyama.ai/druginteractions-kg).
@@ -42,7 +42,7 @@
 | Drug interactions | 8 | Drug Interactions | Easy-Medium |
 | Side effect lookup | 6 | Drug Interactions | Easy-Hard |
 | Pathway membership | 6 | Pathways | Easy-Medium |
-| Cross-KG federation | 8 | Drug Int. + Pathways + Clinical Trials | Hard |
+| Cross-KG joins | 8 | Drug Int. + Pathways + Clinical Trials | Hard |
 | Polypharmacy risk | 4 | Drug Interactions | Medium |
 | Drug classification | 4 | Drug Interactions | Easy-Medium |
 | Adverse event analysis | 4 | Drug Interactions | Easy-Hard |
@@ -54,7 +54,7 @@
 | Drug interactions | 8/8 (100%) | 93ms |
 | Side effects | 6/6 (100%) | 692ms |
 | Pathway membership | 6/6 (100%) | 792ms |
-| Cross-KG federation | 8/8 (100%) | 2,199ms |
+| Cross-KG joins | 8/8 (100%) | 2,199ms |
 | Drug classification | 4/4 (100%) | 98ms |
 | Adverse events | 4/4 (100%) | 1,049ms |
 | Polypharmacy risk | 3/4 (75%) | 158ms |
@@ -94,9 +94,20 @@ Samyama's built-in NLQ endpoint with per-tenant schema-aware system prompt (full
 ### GPT-4o Standalone (75% accuracy)
 GPT-4o answers from training data without database access. Strong on general pharmacology knowledge but fails on precise identifiers (DrugBank IDs), exact counts, and shared-target queries.
 
-## Cross-KG Federation
+## Cross-KG Joins
 
-The benchmark includes 8 cross-KG queries that join across multiple knowledge graphs using WHERE-based property bridges:
+The benchmark includes 8 queries that join across knowledge graphs using WHERE-based property bridges.
+
+> **Not federation.** The three KGs are built, versioned and licensed independently and any
+> subset can be loaded on its own — but they are **imported into one store**, where shared
+> properties merge them on load with no alignment step. There is no query-time federation:
+> no remote endpoints, no mediator, no distributed planner. These are ordinary joins over a
+> merged graph, and the interesting property is that the merge is automatic while the
+> sources stay independent.
+>
+> The scenario file, the `category` field and the `--category` value are still named
+> `cross_kg_federation`. That name is **historical and deliberately unchanged**: results
+> under it are already published, and renaming it would silently break comparison with them.
 
 ```cypher
 -- Drug Interactions → Pathways: drug targets → biological pathways
@@ -149,7 +160,7 @@ These are fundamentally different tasks. GPT-4o standalone answers from **traini
 
 ### Could text-to-Cypher improve further?
 
-Yes. The Remote Planet demo (single KG, 10 labels) achieved 100% NLQ accuracy with iterative prompt engineering. But the BiomedQA schema is 3x more complex (19 labels, 12 edge types, 3 federated KGs), making text-to-Cypher fundamentally harder. MCP tools eliminate the schema complexity problem entirely.
+Yes. The Remote Planet demo (single KG, 10 labels) achieved 100% NLQ accuracy with iterative prompt engineering. But the BiomedQA schema is 3x more complex (19 labels, 12 edge types, 3 merged KGs), making text-to-Cypher fundamentally harder. MCP tools eliminate the schema complexity problem entirely.
 
 ### Why not test with other LLMs?
 
