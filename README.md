@@ -173,6 +173,45 @@ This benchmark is used in:
 - **GRADES-NDA 2026** (SIGMOD workshop) — Federated Biomedical Knowledge Graphs
 - **aiDM 2026** (SIGMOD workshop) — Domain-Specific MCP Tools vs. Generic Text-to-Cypher
 
+## Beyond the benchmark: a 318M-node corpus
+
+BiomedQA runs on the three KGs above. Every number in this README — including the
+98 / 85 / 75 result — was measured on that three-graph setup, and nowhere else.
+
+The same merge-on-load approach has been taken to fifteen KGs plus two synthetic
+patient cohorts. That is context for how far the approach carries, **not** part of
+this benchmark:
+
+| | BiomedQA setup | 15-KG corpus |
+|---|---:|---:|
+| Knowledge graphs | 3 | 15 (+2 Synthea cohorts) |
+| Nodes | 7.9M | **318,275,262** |
+| Edges | 28M | **1,408,063,098** |
+| Entities merged across sources | — | **59,647** |
+| Peak resident memory | — | 422.1 GB |
+| Load time | ~3 min | 2h39m |
+
+Measured 2026-08-21 on samyama-graph OSS `2e13f46`, AWS `r5.24xlarge`. A 96-query
+suite over EMR, omics and clinical-trial questions returns results for 69 at that
+scale; 21 return empty (cross-KG string joins that do not match — a data
+harmonisation gap) and 6 time out.
+
+**The merge count was predicted before it was measured.** Merge keys cannot be read
+from a `.sgsnap` header — it carries labels and edge types, never property keys — so
+they were derived by scanning every property in all fifteen snapshots and keeping
+those that collide across snapshots, are near-injective within one, are
+namespace-shaped rather than prose, and are same-label. That yields `go_id`,
+`uniprot_id`, `mondo_id`, `drugbank_id`, `iso_code` and a prediction of 59,646. The
+load produced 59,647.
+
+Name-shaped keys were rejected deliberately. `Drug|name` and `Disease|name` would
+have added 37,858 more "merges", but names are not identifiers: `mondo:Disease` and
+`hpo:Phenotype` share 5,565 name strings between them.
+
+**Patient records are Synthea-generated** — 295k synthetic patients in OMOP CDM — so
+EMR-to-trial-to-omics joins can be published and rerun without PHI. The FAERS
+adverse-event reports beside them are real; the two are not interchangeable.
+
 ## Hardware
 
 All results verified on AWS g4dn.4xlarge (16 vCPU AMD EPYC, 62GB RAM, NVIDIA A10G) with all 3 KGs loaded (7.9M nodes, 28M edges). Results reproduced across 4 independent fresh-load runs.
