@@ -3,7 +3,7 @@
 40 pharmacology questions over three independently built biomedical knowledge graphs, merged into a single store, designed to evaluate AI agent approaches for domain-specific data access.
 
 > Part of the **Samyama** ecosystem — exercises three biomedical KGs via the graph engine at [samyama-ai/samyama-graph](https://github.com/samyama-ai/samyama-graph).
-> Benchmark framework + ground-truth set; the underlying KG data lives in [pubmed-kg](https://github.com/samyama-ai/pubmed-kg), [clinicaltrials-kg](https://git.samyama.ai/Samyama.ai/clinicaltrials-kg), and [druginteractions-kg](https://git.samyama.ai/Samyama.ai/druginteractions-kg).
+> Benchmark framework + ground-truth set; the underlying KG data lives in [pubmed-kg](https://github.com/samyama-ai/pubmed-kg), [clinicaltrials-kg](https://github.com/samyama-ai/clinicaltrials-kg), and [druginteractions-kg](https://github.com/samyama-ai/druginteractions-kg).
 
 ## Key Results
 
