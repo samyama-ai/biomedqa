@@ -1,0 +1,13 @@
+id,name,category,cypher
+PRO01,Proteins per organism top 10,aggregation,"MATCH (p:Protein)-[:FROM_ORGANISM]->(o:Organism) RETURN o.name, count(p) AS cnt ORDER BY cnt DESC LIMIT 10"
+PRO02,Longest proteins,scan_filter,"MATCH (p:Protein) WHERE p.sequence_length > 5000 RETURN p.uniprot_id, p.name, p.sequence_length ORDER BY p.sequence_length DESC LIMIT 10"
+PRO03,Proteins with EC number,aggregation,MATCH (p:Protein) WHERE p.ec_number CONTAINS '.' RETURN count(p) AS enzyme_count
+PRO04,Multi-gene proteins,scan_filter,"MATCH (p:Protein) WHERE p.gene_names IS NOT NULL AND p.gene_names CONTAINS ' ' RETURN p.uniprot_id, p.gene_name, p.gene_names LIMIT 10"
+PRO05,Protein with most GO terms,aggregation,"MATCH (p:Protein)-[:HAS_GO_TERM]->(g:GOTerm) WITH p, count(g) AS go_count ORDER BY go_count DESC LIMIT 5 RETURN p.uniprot_id, p.gene_name, go_count"
+PRO06,Average GO terms per protein,aggregation,"MATCH (p:Protein)-[:HAS_GO_TERM]->(g:GOTerm) WITH p, count(g) AS gc RETURN avg(gc) AS avg_go_terms"
+PRO07,Proteins shared between organisms,aggregation,MATCH (o:Organism)<-[:FROM_ORGANISM]-(p:Protein) WHERE o.name CONTAINS 'Escherichia coli' RETURN count(p) AS ecoli_proteins
+PTH01,Largest pathways by protein count,aggregation,"MATCH (prot:Protein)-[:PARTICIPATES_IN]->(p:Pathway) RETURN p.name, count(prot) AS proteins ORDER BY proteins DESC LIMIT 10"
+PTH02,Most connected proteins (interaction hub),aggregation,"MATCH (p1:Protein)-[:INTERACTS_WITH]->(p2:Protein) RETURN p1.name, count(p2) AS interactions ORDER BY interactions DESC LIMIT 10"
+PTH03,Protein complexes,one_hop,"MATCH (p:Protein)-[:COMPONENT_OF]->(c:Complex) RETURN p.name, c.name LIMIT 10"
+PTH04,Pathway hierarchy (parent-child),one_hop,"MATCH (child:Pathway)-[:CHILD_OF]->(parent:Pathway) RETURN child.name, parent.name LIMIT 10"
+PTH05,Shared pathways between interacting proteins,two_hop,"MATCH (p1:Protein)-[:INTERACTS_WITH]->(p2:Protein) WHERE p1.name = 'TP53' WITH p2 LIMIT 1 MATCH (p2)-[:PARTICIPATES_IN]->(pw:Pathway) RETURN p2.name, pw.name LIMIT 10"

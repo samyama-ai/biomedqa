@@ -173,42 +173,42 @@ This benchmark is used in:
 - **GRADES-NDA 2026** (SIGMOD workshop) — Federated Biomedical Knowledge Graphs
 - **aiDM 2026** (SIGMOD workshop) — Domain-Specific MCP Tools vs. Generic Text-to-Cypher
 
-## Beyond the benchmark: a 318M-node corpus
+## Beyond the benchmark: a 328.1M-node corpus
 
-BiomedQA runs on the three KGs above. Every number in this README — including the
-98 / 85 / 75 result — was measured on that three-graph setup, and nowhere else.
+BiomedQA runs on the three KGs above. Every number in the 40-question evaluation — including the
+98 / 85 / 75 result — was measured on that three-graph setup.
 
-The same merge-on-load approach has been taken to fifteen KGs plus two synthetic
-patient cohorts. That is context for how far the approach carries, **not** part of
-this benchmark:
+The same merge-on-load approach has been scaled to **twenty-two KGs plus two synthetic
+patient cohorts** (`295k` Synthea OMOP patients). Both the 200-query oracle workload
+(`scenarios/federation_200q/`) and the full Run 5 benchmark outputs
+(`results/federation-200q-328M-2026-10-29-run5-v1.13.0.{csv,log}`) are included in this repository:
 
-| | BiomedQA setup | 15-KG corpus |
-|---|---:|---:|
-| Knowledge graphs | 3 | 15 (+2 Synthea cohorts) |
-| Nodes | 7.9M | **318,275,262** |
-| Edges | 28M | **1,408,063,098** |
-| Entities merged across sources | — | **59,647** |
-| Peak resident memory | — | 422.1 GB |
-| Load time | ~3 min | 2h39m |
+| Metric | 3-KG BiomedQA Setup | 15-KG Corpus (`2026-08-21`) | 22-KG + 2-Cohort Corpus (`2026-10-29`, Run 5) |
+|---|---:|---:|---:|
+| Knowledge graphs | 3 | 15 (+2 Synthea cohorts) | **22 (+2 Synthea cohorts)** |
+| Nodes | 7.9M | 318,275,262 | **328,130,739** |
+| Edges | 28M | 1,408,063,098 | **1,441,425,733** (`1,442,173,238` w/ study refs) |
+| Cross-source entity merges | — | 59,647 | **132,511** (`87.8%` of `150,965` sound ceiling) |
+| Peak resident memory | 33 GB | 422.1 GB | **366.5 GB** (`254 B/edge`, `mimalloc`) |
+| Load time | ~3 min | 2h39m | **37m 49s (`2,269.1 s`)** |
+| Reproducible 81-query suite | — | — | **62 pass / 17 empty (`pass_data_gap`) / 2 error** |
+| 200-query oracle suite | — | — | **195 pass (`178` full + `17` data-gap) / 1 `fail_count` / 4 error** |
 
-Measured 2026-08-21 on samyama-graph OSS `2e13f46`, AWS `r5.24xlarge`. A 96-query
-suite over EMR, omics and clinical-trial questions returns results for 69 at that
-scale; 21 return empty (cross-KG string joins that do not match — a data
-harmonisation gap) and 6 time out.
+Measured `2026-10-29` on `samyama-graph` OSS `v1.13.0` (`109d71c0`), AWS `r7i.24xlarge` (96 vCPU, 768 GB RAM).
+On the frozen 81-query subset (`15` of the original `96` queries were never committed), `62` return
+non-empty results, `17` return empty due to upstream source coverage gaps (`pass_data_gap`), and `2`
+hit the 120 s timeout (`EM01`, `EM06`). On the expanded 200-query oracle suite (`scenarios/federation_200q/expected_rows.yaml`),
+**195 of 200 queries pass (`97.5%`)**, including cross-pattern value joins (`SDR05` UMLS ↔ SIDER bridging `4,966` of `5,868` side effects in `1.49 s`; `REG05` FDA 510(k) in `26.9 ms`).
 
-**The merge count was predicted before it was measured.** Merge keys cannot be read
-from a `.sgsnap` header — it carries labels and edge types, never property keys — so
-they were derived by scanning every property in all fifteen snapshots and keeping
-those that collide across snapshots, are near-injective within one, are
-namespace-shaped rather than prose, and are same-label. That yields `go_id`,
-`uniprot_id`, `mondo_id`, `drugbank_id`, `iso_code` and a prediction of 59,646. The
-load produced 59,647.
+**Identifier soundness audit (Bound A).** Scanning all 24 snapshots yields a sound-identifier
+cross-source overlap ceiling of **150,965 merges** across five audited keys:
+`mondo_id,uniprot_id,go_id,drugbank_id,symbol`. Load-time deduplication merges **132,511 entities
+(87.8%)** with zero conflicting-ID refusals. Adding non-canonical `gene_name` alongside `symbol` on
+UniProt collapses **475,090 human + orthologous proteins (`618,093 → 143,003`, 76.9%)** sharing gene
+symbols across species (`samyama-graph #1808`), demonstrating why merge keys must be restricted to
+curated identifier namespaces.
 
-Name-shaped keys were rejected deliberately. `Drug|name` and `Disease|name` would
-have added 37,858 more "merges", but names are not identifiers: `mondo:Disease` and
-`hpo:Phenotype` share 5,565 name strings between them.
-
-**Patient records are Synthea-generated** — 295k synthetic patients in OMOP CDM — so
+**Patient records are Synthea-generated** — 295k synthetic patients in OMOP CDM (`omop-180k` + `omop-115k`) — so
 EMR-to-trial-to-omics joins can be published and rerun without PHI. The FAERS
 adverse-event reports beside them are real; the two are not interchangeable.
 

@@ -1,0 +1,6 @@
+id,name,category,cypher
+DDI01,Drugs with most side effects,aggregation,"MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect) RETURN d.name, count(se) AS side_effects ORDER BY side_effects DESC LIMIT 10"
+DDI02,Drugs sharing a gene target,two_hop,"MATCH (d1:Drug)-[:INTERACTS_WITH_GENE]->(g:Gene)<-[:INTERACTS_WITH_GENE]-(d2:Drug) WHERE d1.name < d2.name RETURN d1.name, d2.name, g.gene_name LIMIT 10"
+DDI03,Side effects shared between two drugs,two_hop,"MATCH (d1:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect)<-[:HAS_SIDE_EFFECT]-(d2:Drug) WHERE d1.name = 'Pregabalin' AND d1 <> d2 RETURN d2.name, se.name LIMIT 10"
+DDI04,Genes targeted by most drugs,aggregation,"MATCH (d:Drug)-[:INTERACTS_WITH_GENE]->(g:Gene) RETURN g.gene_name, count(d) AS drugs ORDER BY drugs DESC LIMIT 10"
+DDI05,Drugs with both gene targets and adverse events,pattern,"MATCH (d:Drug)-[:INTERACTS_WITH_GENE]->(g:Gene) WITH d, g LIMIT 50 MATCH (d)-[:HAS_ADVERSE_EVENT]->(ae:AdverseEvent) RETURN d.name, g.gene_name, ae.term LIMIT 10"

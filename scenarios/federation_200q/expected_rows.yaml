@@ -1,0 +1,947 @@
+# Expected rows — oracle for the 200-query large-scale federation suite
+#
+# Read by `load_oracle` in samyama-graph/examples/unified_benchmark.rs and applied
+# by `classify(rows, oracle)`. One entry per query ID; a missing ID silently
+# degrades to `non_empty`, which is the weakness this file exists to remove.
+#
+# status semantics (from `classify`):
+#   exact          rows == `rows`                       -> pass, else fail_count
+#   range          `min` <= rows <= `max`               -> pass, else fail_count
+#                  (`min` defaults to 1, `max` to unbounded)
+#   aggregation    any row count, including 0           -> pass
+#   data_dependent any row count; 0 reports pass_data_gap
+#   non_empty      rows > 0                             -> pass (the default)
+#
+# Conventions this file follows, in order of preference:
+#
+#  1. `exact` is used ONLY where the row count follows from Cypher semantics and
+#     not from the data: a projection made entirely of aggregates with no grouping
+#     key returns exactly one row whatever the store holds. No `exact` row count
+#     here was invented from a guess at the data.
+#  2. `range` max is the query's own LIMIT wherever it has one — that is a
+#     semantic ceiling, not an estimate. Where a query has no LIMIT the max is a
+#     deliberately wide bound on the grouping domain, or is omitted entirely so
+#     only a floor is asserted.
+#  3. `range` min for the 81 frozen queries is the row count MEASURED on the
+#     2026-10-04 federation, which two independent runs reproduced identically.
+#     For every added query min is 1 where the schema guarantees the pattern can
+#     match, and 0 where an anchor literal or a threshold is unverified.
+#  4. `data_dependent` is used where the query is schema-correct but the join has
+#     no data — the 16 cross-vocabulary empties (samyama-graph #318) and the 3
+#     that error — and for the two added queries that errored in every run they
+#     have ever had.
+#
+# Every entry carries a `reason` saying what its numbers are based on. 119 of the
+# 200 say UNEXECUTED: the 1.44B-edge federation needs a 743 GB box and none of the
+# added queries has been run on it. See QUERY-SUITE.md.
+
+queries:
+  CT01:
+    status: range
+    min: 11
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  CT02:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CT03:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CT04:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CT05:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CT06:
+    status: range
+    min: 30
+    max: 30
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CX01:
+    status: range
+    min: 1
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  CX02:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CX03:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CX04:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CX05:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  CX06:
+    status: range
+    min: 1
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  DDI01:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  DDI02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  DDI03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  DDI04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 1 rows on a standalone store at v1.0.0"
+  DDI05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  EAI01:
+    status: range
+    min: 0
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; the 256 KB threshold is not verified against the 134 Board nodes"
+  EAI02:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 1,513 Deployment and 134 Board nodes joined by ON_BOARD"
+  EAI03:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 22,583 Kernel and 377 Operator nodes joined by IMPLEMENTS"
+  EAI04:
+    status: range
+    min: 0
+    max: 16
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 16 SignalStage nodes; NEXT_STAGE is in edge-ai-kg/docs/schema.md but its population is unmeasured"
+  EAI05:
+    status: range
+    min: 1
+    max: 50
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 134 Board and 52 SoC nodes joined by HAS_SOC"
+  EDU01:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 795 Course and 127 Subject nodes joined by IN_SUBJECT in etl/load_pwcs.py"
+  EDU02:
+    status: range
+    min: 0
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; REQUIRES is written by etl/load_pwcs.py but prerequisite extraction may have produced none"
+  EDU03:
+    status: range
+    min: 0
+    max: 10
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; same as EDU02, and a transitive chain needs at least two REQUIRES edges"
+  EDU04:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 38 Pathway and 795 Course nodes joined by INCLUDES"
+  EDU05:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; IN_SUBJECT drives the pattern; the OPTIONAL MATCH cannot reduce the row count"
+  EHR01:
+    status: range
+    min: 1
+    max: 5
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 2 rows on a standalone store at v1.0.0"
+  EHR02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 1 rows on a standalone store at v1.0.0"
+  EHR03:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  EHR04:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  EHR05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  EHR06:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  EHR07:
+    status: range
+    min: 1
+    max: 3
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 3 rows on a standalone store at v1.0.0"
+  EHR08:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  EM01:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  EM02:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  EM03:
+    status: range
+    min: 5
+    max: 15
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  EM04:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  EM05:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  EM06:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  EM07:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  EM08:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  GOA01:
+    status: range
+    min: 1
+    max: 3
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; go_id is a dedup key and OM14 passed anchored on GO:0006281; a residual duplicate would give 2 or 3"
+  GOA02:
+    status: range
+    min: 1
+    max: 6
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; GO has three namespaces; all 38,560 go_goa GOTerm nodes carry one"
+  GOA03:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 38,919 Protein nodes annotated to 38,560 GOTerm nodes by HAS_GO_ANNOTATION"
+  GOA04:
+    status: range
+    min: 0
+    max: 30
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; nothing: GO:0006281 may have no PART_OF ancestors at all"
+  GOA05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; namespace='molecular_function' is one of the three GO namespaces present"
+  LIT01:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT05:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 18 rows on a standalone store at v1.0.0"
+  LIT06:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT07:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT08:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  LIT09:
+    status: data_dependent
+    reason: "UNEXECUTED on the federation; errored in every standalone v0.8.0 and v1.0.0 run, so no row count is claimed"
+  LIT10:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  MNH01:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere; label measured present in the snapshot. 17,254 Facility nodes measured in mental-health-full.sgsnap."
+  MNH02:
+    status: range
+    min: 0
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; state='CA' is not verified present among the 82,978 Provider nodes"
+  MNH03:
+    status: range
+    min: 0
+    max: 25
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; the score > 15 threshold is not verified against the 6,420 ShortageArea scores"
+  MNH04:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; all 17,254 Facility nodes carry state"
+  MNH05:
+    status: range
+    min: 0
+    max: 8
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; age > 65 is not verified among the 3,500 Patient nodes; gender has few values"
+  OM01:
+    status: range
+    min: 18
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM02:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  OM03:
+    status: range
+    min: 50
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM04:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  OM05:
+    status: range
+    min: 2
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM06:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  OM07:
+    status: range
+    min: 50
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM08:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  OM09:
+    status: range
+    min: 50
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM10:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM11:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM12:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM13:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM14:
+    status: range
+    min: 13
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  OM15:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  OM16:
+    status: range
+    min: 6
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  OM17:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  OM18:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH01:
+    status: range
+    min: 100
+    max: 100
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH02:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH03:
+    status: range
+    min: 25
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  PH04:
+    status: range
+    min: 2
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH05:
+    status: range
+    min: 6
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  PH06:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH07:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH08:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH09:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH10:
+    status: range
+    min: 50
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH11:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH12:
+    status: range
+    min: 30
+    max: 30
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH13:
+    status: range
+    min: 25
+    max: 25
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH14:
+    status: range
+    min: 11
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  PH15:
+    status: range
+    min: 77
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  PH16:
+    status: range
+    min: 50
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PH17:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  PH18:
+    status: range
+    min: 44
+    max: 50
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  PLN01:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. The join is the #1813 CartesianProduct shape and is expected to be refused over the 50M-row budget until that is fixed."
+  PLN02:
+    status: range
+    min: 0
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: NCT00000102 may not be in the AACT snapshot and may carry no tagged Article"
+  PLN03:
+    status: range
+    min: 0
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: no index exists on Target(ensembl_id) or Gene(symbol) and the symbol may be absent"
+  PLN04:
+    status: range
+    min: 0
+    max: 20
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: Disease.mondo_id is absent from most ClinVar and all surveillance Disease nodes"
+  PLN05:
+    status: range
+    min: 0
+    max: 20
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: the Pathway name 'Immune System' is not verified present in the federated pathways snapshot"
+  PLN06:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. 1,029,229 Site nodes carry `country`; the scalar count is one row whatever it counts."
+  PLN07:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. Q17 measured ['Humans', 23222680], so the MeSH term exists."
+  PLN08:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. Person and Visit are measured non-empty (EM02 passed)."
+  PLN09:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. 125,689 Condition nodes measured in the AACT snapshot."
+  PLN10:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q16 measured 10 rows for the same Journal grouping"
+  PLN11:
+    status: range
+    min: 1
+    max: 50
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q11 measured 11 MeSH terms for pmid 1000000, and OPTIONAL MATCH preserves the row"
+  PLN12:
+    status: range
+    min: 0
+    max: 1
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from a single anchored node yields at most one group; 0 if NCT00000102 is absent"
+  PLN13:
+    status: range
+    min: 1
+    max: 500
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q17 shows MeSH annotation is populated; the WITH caps the driving set at 200"
+  PLN14:
+    status: range
+    min: 1
+    max: 100
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from OM01 passed anchored on uniprot_id P04637, so the node exists"
+  PLN15:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. Q13 measured 0 outgoing CITES for pmid 1000000, so the count may well be 0 — still one row."
+  PLN16:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. OM01 passed on P04637 INTERACTS_WITH."
+  PLN17:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. OM14 passed on IS_A from a GO term."
+  PLN18:
+    status: range
+    min: 0
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: MONDO supplies Disease IS_A but ClinVar and surveillance Disease nodes have none"
+  PLN19:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q17 measured 10 rows over the same ANNOTATED_WITH grouping"
+  PLN20:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q16 measured 10 rows over the same PUBLISHED_IN grouping"
+  PLN21:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q18 measured 10 rows over the same MENTIONS_CHEMICAL grouping"
+  PLN22:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. A scalar count is one row; Q13 suggests the value may be small."
+  PLN23:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere. OM15 used P38398 as an INTERACTS_WITH endpoint."
+  PLN24:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from Q20 measured ['Wei Wang', 28892] as the top author in both runs"
+  PRO01:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PRO02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PRO03:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  PRO04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PRO05:
+    status: range
+    min: 1
+    max: 5
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 5 rows on a standalone store at v1.0.0"
+  PRO06:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  PRO07:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  PTH01:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PTH02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PTH03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PTH04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PTH05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PVG01:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 15 rows on a standalone store at v1.0.0"
+  PVG02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PVG03:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  PVG04:
+    status: data_dependent
+    reason: "UNEXECUTED on the federation; errored in every standalone v0.8.0 and v1.0.0 run, so no row count is claimed"
+  PVG05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PVG06:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  PVG07:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
+  PVG08:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  Q01:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q02:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q03:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  Q04:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q05:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q06:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q07:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q08:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q09:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q10:
+    status: range
+    min: 3
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  Q11:
+    status: range
+    min: 11
+    reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
+  Q12:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  Q13:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  Q14:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q15:
+    status: range
+    min: 20
+    max: 20
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q16:
+    status: range
+    min: 10
+    max: 10
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q17:
+    status: range
+    min: 10
+    max: 10
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q18:
+    status: range
+    min: 10
+    max: 10
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q19:
+    status: range
+    min: 10
+    max: 10
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q20:
+    status: range
+    min: 10
+    max: 10
+    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+  Q21:
+    status: data_dependent
+    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+  Q22:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q23:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q24:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  Q25:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
+  REG01:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere; label measured present in the snapshot. 19,193 Submission nodes measured in regulatory-affairs.sgsnap."
+  REG02:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; all 19,193 Submission nodes carry decision_code"
+  REG03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; all 7,094 ProductCode nodes carry device_class, which has few values"
+  REG04:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; all 2,292 Regulation nodes carry part and cfr_section"
+  REG05:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere; label measured present in the snapshot. No relationship type is evidenced for this snapshot, so the Submission-ProductCode link can only be a value join — the #1813 shape."
+  SDH01:
+    status: range
+    min: 1
+    max: 70
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 5 rows on a standalone store at v1.0.0"
+  SDH02:
+    status: range
+    min: 1
+    max: 200
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 11 rows on a standalone store at v1.0.0"
+  SDH03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  SDH04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 7 rows on a standalone store at v1.0.0"
+  SDH05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  SDR01:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere; label measured present in the snapshot. All 1,430 SIDER Drug nodes carry stitch_id."
+  SDR02:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 1,430 Drug and 5,868 SideEffect nodes joined by HAS_SIDE_EFFECT"
+  SDR03:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; all 5,868 SideEffect nodes carry umls_cui"
+  SDR04:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 5,868 SideEffect nodes, 5,805 of them named"
+  SDR05:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere; label measured present in the snapshot. SIDER writes umls_cui and UMLS writes cui, so these never merged (0 of 9,814,998) — this query measures the #318 gap directly and is also the #1813 equality-join shape."
+  SYS01:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  SYS02:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 4 rows on a standalone store at v1.0.0"
+  SYS03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  SYS04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  TRI01:
+    status: range
+    min: 1
+    max: 15
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 15 rows on a standalone store at v1.0.0"
+  TRI02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  TRI03:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 1 rows on a standalone store at v1.0.0"
+  TRI04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  TRI05:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  UML01:
+    status: range
+    min: 0
+    max: 1
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; C0011849 is a stable UMLS CUI but is not verified present in this 2,477,303-concept subset"
+  UML02:
+    status: range
+    min: 1
+    max: 20
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 127 SemanticType nodes and HAS_SEMANTIC_TYPE are both in the loader"
+  UML03:
+    status: range
+    min: 1
+    max: 25
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; all 7,337,568 Atom nodes carry source_vocabulary"
+  UML04:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED anywhere; schema measured from the snapshot (mergeable-bound/property_key_inventory.csv); max is the query's own LIMIT; 7,337,568 Atom nodes reached by SYNONYM from 2,477,303 Concept nodes"
+  UML05:
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; UNEXECUTED anywhere; label measured present in the snapshot. RELATED_TO is created by the loader; the CUI anchor may be absent, which is still one row."
+  XKG01:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+  XKG02:
+    status: range
+    min: 1
+    max: 10
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 1 rows on a standalone store at v1.0.0"
+  XKG03:
+    status: range
+    min: 1
+    max: 5
+    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 4 rows on a standalone store at v1.0.0"

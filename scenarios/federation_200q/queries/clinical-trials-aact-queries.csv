@@ -1,0 +1,6 @@
+id,name,category,cypher
+TRI01,Trials per country,aggregation,"MATCH (t:ClinicalTrial)-[:CONDUCTED_AT]->(s:Site) RETURN s.country, count(DISTINCT t) AS trials ORDER BY trials DESC LIMIT 15"
+TRI02,Top sponsors,aggregation,"MATCH (t:ClinicalTrial)-[:SPONSORED_BY]->(sp:Sponsor) RETURN sp.name, count(t) AS trials ORDER BY trials DESC LIMIT 10"
+TRI03,Sites running the most trials,aggregation,"MATCH (t:ClinicalTrial)-[:CONDUCTED_AT]->(s:Site) WHERE s.country = 'United States' RETURN s.facility, count(t) AS trials ORDER BY trials DESC LIMIT 10"
+TRI04,Condition → Intervention → AE chain,three_hop,"MATCH (cond:Condition)<-[:STUDIES]-(t:ClinicalTrial)-[:TESTS]->(i:Intervention) WHERE cond.name CONTAINS 'Hypertension' WITH t, i LIMIT 2000 MATCH (t)-[:REPORTED]->(ae:AdverseEvent) RETURN i.name, ae.term, count(DISTINCT t) AS trials ORDER BY trials DESC LIMIT 10"
+TRI05,Multi-arm trials with adverse events,two_hop,"MATCH (t:ClinicalTrial)-[:HAS_ARM]->(arm:ArmGroup) WITH t, count(arm) AS arms WHERE arms >= 4 WITH t, arms ORDER BY arms DESC LIMIT 100 MATCH (t)-[:REPORTED]->(ae:AdverseEvent) RETURN t.nct_id, arms, ae.term LIMIT 10"

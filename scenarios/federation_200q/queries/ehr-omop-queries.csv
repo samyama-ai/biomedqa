@@ -1,0 +1,9 @@
+id,name,category,cypher
+EHR01,Gender distribution,aggregation,"MATCH (p:Person) WHERE p.gender IS NOT NULL RETURN p.gender, count(p) AS cnt ORDER BY cnt DESC"
+EHR02,State distribution,aggregation,"MATCH (p:Person) WHERE p.state IS NOT NULL RETURN p.state, count(p) AS cnt ORDER BY cnt DESC LIMIT 10"
+EHR03,Visit class distribution,aggregation,"MATCH (v:Visit) WHERE v.encounter_class IS NOT NULL RETURN v.encounter_class, count(v) AS cnt ORDER BY cnt DESC"
+EHR04,Comorbidity pairs,cohort,MATCH (p:Person)-[:HAS_CONDITION]->(c1:ConditionOccurrence) WHERE c1.condition_concept CONTAINS 'Diabetes' WITH p LIMIT 1000 MATCH (p)-[:HAS_CONDITION]->(c2:ConditionOccurrence) WHERE c2.condition_concept CONTAINS 'Hypertension' RETURN count(DISTINCT p) AS comorbid_patients
+EHR05,Expensive visits,scan_filter,"MATCH (v:Visit) WHERE v.cost > 10000 RETURN v.encounter_class, v.cost, v.description ORDER BY v.cost DESC LIMIT 10"
+EHR06,Patient journey length,aggregation,"MATCH (p:Person)-[:VISITED]->(v:Visit) WITH p, count(v) AS journey_len RETURN avg(journey_len) AS avg_visits_per_patient"
+EHR07,Ambulatory vs inpatient,aggregation,"MATCH (v:Visit) WHERE v.encounter_class IN ['ambulatory', 'inpatient', 'emergency'] RETURN v.encounter_class, count(v) AS cnt ORDER BY cnt DESC"
+EHR08,Polypharmacy patients (5+ drugs),cohort,"MATCH (p:Person)-[:PRESCRIBED]->(m:DrugExposure) WITH p, count(DISTINCT m.drug_name) AS unique_drugs WHERE unique_drugs >= 5 RETURN count(p) AS polypharmacy_patients"

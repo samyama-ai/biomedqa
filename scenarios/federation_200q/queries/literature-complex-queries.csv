@@ -1,0 +1,11 @@
+id,name,category,cypher
+LIT01,Articles by year,scan_filter,"MATCH (a:Article) WHERE a.pub_year = 2020 RETURN a.pmid, a.title LIMIT 10"
+LIT02,Citation chain (who cites my citers),two_hop,"MATCH (a:Article)<-[:CITES]-(b:Article)<-[:CITES]-(c:Article) WHERE a.pmid = '20000334' RETURN b.pmid, c.pmid LIMIT 10"
+LIT03,MeSH co-occurrence (Neoplasms),three_hop,"MATCH (m1:MeSHTerm)<-[:ANNOTATED_WITH]-(a:Article)-[:ANNOTATED_WITH]->(m2:MeSHTerm) WHERE m1.name = 'Neoplasms' AND m1 <> m2 RETURN m2.name, count(a) AS cnt ORDER BY cnt DESC LIMIT 10"
+LIT04,Author collaboration network,three_hop,"MATCH (au1:Author)<-[:AUTHORED_BY]-(a:Article)-[:AUTHORED_BY]->(au2:Author) WHERE au1.name = 'Arie Hasman' AND au1 <> au2 RETURN au2.name, count(a) AS papers ORDER BY papers DESC LIMIT 10"
+LIT05,Publication trend by year for a MeSH term,aggregation,"MATCH (m:MeSHTerm)<-[:ANNOTATED_WITH]-(a:Article) WHERE m.name = 'Machine Learning' RETURN a.pub_year, count(a) AS articles ORDER BY a.pub_year DESC LIMIT 20"
+LIT06,Articles with both MeSH and Chemical annotations,pattern,"MATCH (m:MeSHTerm {name: 'Machine Learning'})<-[:ANNOTATED_WITH]-(a:Article) WITH a LIMIT 100 MATCH (a)-[:MENTIONS_CHEMICAL]->(c:Chemical) RETURN a.pmid, c.name LIMIT 10"
+LIT07,MeSH terms for NIH-funded articles,two_hop,"MATCH (g:Grant)<-[:FUNDED_BY]-(a:Article)-[:ANNOTATED_WITH]->(m:MeSHTerm) WHERE g.agency = 'NCI NIH HHS' RETURN m.name, count(DISTINCT a) AS papers ORDER BY papers DESC LIMIT 10"
+LIT08,Multi-MeSH article (articles with 5+ MeSH terms),aggregation,"MATCH (a:Article)-[:ANNOTATED_WITH]->(m:MeSHTerm) WHERE a.pmid >= '30000000' AND a.pmid < '30000100' WITH a, count(m) AS mesh_count WHERE mesh_count >= 5 RETURN a.pmid, mesh_count ORDER BY mesh_count DESC LIMIT 10"
+LIT09,Author collaboration (multi-authored articles),aggregation,"MATCH (a:Article) WITH a LIMIT 50000 MATCH (a)-[:AUTHORED_BY]->(au:Author) WITH a, count(au) AS num_authors WHERE num_authors > 10 RETURN a.pmid, a.title, num_authors ORDER BY num_authors DESC LIMIT 5"
+LIT10,Chemical → Journal pathway,two_hop,"MATCH (c:Chemical)<-[:MENTIONS_CHEMICAL]-(a:Article)-[:PUBLISHED_IN]->(j:Journal) WHERE c.name = 'Metformin' RETURN j.title, count(a) AS articles ORDER BY articles DESC LIMIT 10"

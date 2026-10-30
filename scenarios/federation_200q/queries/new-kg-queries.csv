@@ -1,0 +1,36 @@
+id,name,category,cypher
+UML01,UMLS concept by CUI,point_lookup,"MATCH (c:Concept {cui:'C0011849'}) RETURN c.cui, c.preferred_name"
+UML02,UMLS semantic type distribution,aggregation,"MATCH (c:Concept)-[:HAS_SEMANTIC_TYPE]->(s:SemanticType) RETURN s.name AS semantic_type, count(c) AS concepts ORDER BY concepts DESC LIMIT 20"
+UML03,UMLS atoms per source vocabulary,aggregation,"MATCH (a:Atom) RETURN a.source_vocabulary AS vocabulary, count(a) AS atoms ORDER BY atoms DESC LIMIT 25"
+UML04,UMLS concepts with the most distinct synonyms,aggregation,"MATCH (c:Concept)-[:SYNONYM]->(a:Atom) RETURN c.cui AS cui, count(DISTINCT a.name) AS synonyms ORDER BY synonyms DESC LIMIT 10"
+UML05,UMLS related-concept degree (undirected),one_hop,MATCH (c1:Concept {cui:'C0011849'})-[:RELATED_TO]-(c2:Concept) RETURN count(DISTINCT c2) AS related_concepts
+SDR01,SIDER drug count by stitch_id,aggregation,MATCH (d:Drug) WHERE d.stitch_id IS NOT NULL RETURN count(d) AS sider_drugs
+SDR02,SIDER drugs with the most side effects,aggregation,"MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect) WHERE d.stitch_id IS NOT NULL RETURN d.stitch_id AS drug, count(DISTINCT se) AS side_effects ORDER BY side_effects DESC LIMIT 15"
+SDR03,SIDER side effects carrying a UMLS CUI,scan_filter,"MATCH (se:SideEffect) WHERE se.umls_cui IS NOT NULL RETURN se.name AS side_effect, se.umls_cui AS umls_cui LIMIT 20"
+SDR04,SIDER commonest side effects across drugs,aggregation,"MATCH (d:Drug)-[:HAS_SIDE_EFFECT]->(se:SideEffect) WHERE se.umls_cui IS NOT NULL RETURN se.name AS side_effect, count(DISTINCT d) AS drugs ORDER BY drugs DESC LIMIT 15"
+SDR05,SIDER side effect to UMLS concept value join,cross_kg,MATCH (se:SideEffect) WHERE se.umls_cui IS NOT NULL MATCH (c:Concept) WHERE c.cui = se.umls_cui RETURN count(DISTINCT se) AS bridged_side_effects
+GOA01,GO term by GO id,point_lookup,"MATCH (g:GOTerm {go_id:'GO:0006281'}) RETURN g.go_id, g.name, g.namespace"
+GOA02,GO namespace distribution,aggregation,"MATCH (g:GOTerm) WHERE g.namespace IS NOT NULL RETURN g.namespace AS namespace, count(g) AS terms ORDER BY terms DESC"
+GOA03,GOA most-annotated GO terms,aggregation,"MATCH (p:Protein)-[:HAS_GO_ANNOTATION]->(g:GOTerm) RETURN g.name AS go_term, count(DISTINCT p) AS proteins ORDER BY proteins DESC LIMIT 20"
+GOA04,"GO PART_OF ancestors, variable length",traversal,"MATCH (g:GOTerm {go_id:'GO:0006281'})-[:PART_OF*1..3]->(anc:GOTerm) RETURN DISTINCT anc.go_id, anc.name LIMIT 30"
+GOA05,GOA proteins by molecular-function term count,aggregation,"MATCH (p:Protein)-[:HAS_GO_ANNOTATION]->(g:GOTerm) WHERE g.namespace = 'molecular_function' RETURN p.accession AS protein, count(DISTINCT g) AS mf_terms ORDER BY mf_terms DESC LIMIT 10"
+MNH01,Mental-health facility count,aggregation,MATCH (f:Facility) RETURN count(f) AS facilities
+MNH02,California mental-health providers by taxonomy,aggregation,"MATCH (p:Provider) WHERE p.state = 'CA' RETURN p.taxonomy AS taxonomy, count(p) AS providers ORDER BY providers DESC LIMIT 15"
+MNH03,Worst HPSA shortage areas by score,scan_filter,"MATCH (s:ShortageArea) WHERE s.score > 15 RETURN s.hpsa_id AS hpsa_id, s.name AS area, s.state AS state, s.score AS score ORDER BY s.score DESC LIMIT 25"
+MNH04,Mental-health facilities per state,aggregation,"MATCH (f:Facility) WHERE f.state IS NOT NULL RETURN f.state AS state, count(f) AS facilities ORDER BY facilities DESC LIMIT 20"
+MNH05,Elderly mental-health cohort by gender,aggregation,"MATCH (pt:Patient) WHERE pt.age > 65 RETURN pt.gender AS gender, count(DISTINCT pt) AS elderly_patients ORDER BY elderly_patients DESC"
+REG01,FDA 510(k) submission count,aggregation,MATCH (s:Submission) RETURN count(s) AS submissions
+REG02,Submissions by decision code,aggregation,"MATCH (s:Submission) WHERE s.decision_code IS NOT NULL RETURN s.decision_code AS decision, count(s) AS submissions ORDER BY submissions DESC LIMIT 15"
+REG03,Product codes by device class,aggregation,"MATCH (p:ProductCode) WHERE p.device_class IS NOT NULL RETURN p.device_class AS device_class, count(p) AS product_codes ORDER BY product_codes DESC LIMIT 10"
+REG04,CFR sections per regulation part,aggregation,"MATCH (r:Regulation) RETURN r.part AS cfr_part, count(DISTINCT r.cfr_section) AS sections ORDER BY sections DESC LIMIT 15"
+REG05,Submission to product code value join on device name,cross_kg,MATCH (s:Submission) WHERE s.k_number IS NOT NULL MATCH (p:ProductCode) WHERE p.device_name = s.device_name RETURN count(DISTINCT s) AS matched_submissions
+EAI01,Edge boards above 256 KB RAM,scan_filter,"MATCH (b:Board) WHERE b.ram_kb > 256 RETURN b.name AS board, b.ram_kb AS ram_kb, b.price_usd AS price_usd ORDER BY b.ram_kb DESC LIMIT 20"
+EAI02,Deployments per board with mean latency,aggregation,"MATCH (d:Deployment)-[:ON_BOARD]->(b:Board) RETURN b.name AS board, count(d) AS deployments, avg(d.latency_ms) AS avg_latency_ms ORDER BY deployments DESC LIMIT 15"
+EAI03,Kernels implementing each ONNX operator,aggregation,"MATCH (k:Kernel)-[:IMPLEMENTS]->(o:Operator) RETURN o.name AS operator, count(DISTINCT k) AS kernels ORDER BY kernels DESC LIMIT 20"
+EAI04,"Signal-stage pipeline reachability, variable length",traversal,"MATCH (s1:SignalStage)-[:NEXT_STAGE*1..4]->(s2:SignalStage) RETURN s1.name AS from_stage, count(DISTINCT s2) AS reachable_stages ORDER BY reachable_stages DESC LIMIT 16"
+EAI05,Board SoC with optional accelerator,pattern,"MATCH (b:Board)-[:HAS_SOC]->(s:SoC) OPTIONAL MATCH (b)-[:HAS_ACCELERATOR]->(a:Accelerator) RETURN b.name AS board, s.name AS soc, a.kind AS accelerator LIMIT 50"
+EDU01,Courses per subject,aggregation,"MATCH (c:Course)-[:IN_SUBJECT]->(s:Subject) RETURN s.name AS subject, count(c) AS courses ORDER BY courses DESC LIMIT 20"
+EDU02,Courses with the most prerequisites,aggregation,"MATCH (c:Course)-[:REQUIRES]->(pre:Course) RETURN c.name AS course, count(DISTINCT pre) AS prerequisites ORDER BY prerequisites DESC LIMIT 15"
+EDU03,"Transitive prerequisite closure, variable length",traversal,"MATCH (c:Course)-[:REQUIRES*1..4]->(pre:Course) RETURN c.url AS course, count(DISTINCT pre) AS transitive_prereqs ORDER BY transitive_prereqs DESC LIMIT 10"
+EDU04,Courses included in each pathway,aggregation,"MATCH (p:Pathway)-[:INCLUDES]->(c:Course) RETURN p.name AS pathway, p.kind AS kind, count(DISTINCT c) AS courses ORDER BY courses DESC LIMIT 20"
+EDU05,Subjects with optional course requirements,pattern,"MATCH (c:Course)-[:IN_SUBJECT]->(s:Subject) OPTIONAL MATCH (c)-[:HAS_REQUIREMENT]->(r:Requirement) RETURN s.name AS subject, count(DISTINCT c) AS courses, count(DISTINCT r) AS requirements ORDER BY courses DESC LIMIT 20"
