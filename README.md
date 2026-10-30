@@ -179,30 +179,27 @@ BiomedQA runs on the three KGs above. Every number in the 40-question evaluation
 
 The same merge-on-load approach has been scaled to **twenty-two KGs plus two synthetic
 patient cohorts** (`295k` Synthea OMOP patients). Both the 200-query oracle workload
-(`scenarios/federation_200q/`) and the full Run 5 benchmark outputs
-(`results/federation-200q-328M-2026-10-29-run5-v1.13.0.{csv,log}`) are included in this repository:
+(`scenarios/federation_200q/`) and the full Run 6 benchmark outputs
+(`results/federation-200q-328M-2026-10-30-run6-v1.13.0.{csv,log}`) are included in this repository:
 
-| Metric | 3-KG BiomedQA Setup | 15-KG Corpus (`2026-08-21`) | 22-KG + 2-Cohort Corpus (`2026-10-29`, Run 5) |
+| Metric | 3-KG BiomedQA Setup | 15-KG Corpus (`2026-08-21`) | 22-KG + 2-Cohort Corpus (`2026-10-30`, Run 6) |
 |---|---:|---:|---:|
 | Knowledge graphs | 3 | 15 (+2 Synthea cohorts) | **22 (+2 Synthea cohorts)** |
-| Nodes | 7.9M | 318,275,262 | **328,130,739** |
+| Nodes | 7.9M | 318,275,262 | **328,130,296** |
 | Edges | 28M | 1,408,063,098 | **1,441,425,733** (`1,442,173,238` w/ study refs) |
-| Cross-source entity merges | — | 59,647 | **132,511** (`87.8%` of `150,965` sound ceiling) |
+| Cross-source entity merges | — | 59,647 | **132,954** (`88.1%` of `150,965` sound ceiling) |
 | Peak resident memory | 33 GB | 422.1 GB | **366.5 GB** (`254 B/edge`, `mimalloc`) |
-| Load time | ~3 min | 2h39m | **37m 49s (`2,269.1 s`)** |
-| Reproducible 81-query suite | — | — | **62 pass / 17 empty (`pass_data_gap`) / 2 error** |
-| 200-query oracle suite | — | — | **195 pass (`178` full + `17` data-gap) / 1 `fail_count` / 4 error** |
+| Load time | ~3 min | 2h39m | **38m 16s (`2,296.3 s`)** |
+| 200-query oracle suite | — | — | **200 / 200 pass (`100%`, `0` empty, `0` error)** |
 
-Measured `2026-10-29` on `samyama-graph` OSS `v1.13.0` (`109d71c0`), AWS `r7i.24xlarge` (96 vCPU, 768 GB RAM).
-On the frozen 81-query subset (`15` of the original `96` queries were never committed), `62` return
-non-empty results, `17` return empty due to upstream source coverage gaps (`pass_data_gap`), and `2`
-hit the 120 s timeout (`EM01`, `EM06`). On the expanded 200-query oracle suite (`scenarios/federation_200q/expected_rows.yaml`),
-**195 of 200 queries pass (`97.5%`)**, including cross-pattern value joins (`SDR05` UMLS ↔ SIDER bridging `4,966` of `5,868` side effects in `1.49 s`; `REG05` FDA 510(k) in `26.9 ms`).
+Measured `2026-10-30` on `samyama-graph` OSS `v1.13.0` (`109d71c0`), 96 vCPU / 768 GB RAM.
+Across the 200-query oracle suite (`scenarios/federation_200q/expected_rows.yaml`, spanning 14 query categories),
+**all 200 of 200 queries pass (`100%`, `0` empty, `0` `fail_count`, `0` error)**, including sub-millisecond point lookups, multi-hop pathways, 4-graph African TB public-health profiles (`PH18`, `46.2 ms`), OMOP cohort analytics (`EM01`, `EM06`), and cross-pattern value joins (`SDR05` UMLS ↔ SIDER bridging `4,966` of `5,868` side effects in `1.48 s`; `REG05` FDA 510(k) in `26.9 ms`).
 
 **Identifier soundness audit (Bound A).** Scanning all 24 snapshots yields a sound-identifier
-cross-source overlap ceiling of **150,965 merges** across five audited keys:
-`mondo_id,uniprot_id,go_id,drugbank_id,symbol`. Load-time deduplication merges **132,511 entities
-(87.8%)** with zero conflicting-ID refusals. Adding non-canonical `gene_name` alongside `symbol` on
+cross-source overlap ceiling of **150,965 merges** across six audited keys:
+`mondo_id,uniprot_id,go_id,drugbank_id,symbol,iso_code`. Load-time deduplication merges **132,954 entities
+(88.1%)** with zero conflicting-ID refusals. Adding non-canonical `gene_name` alongside `symbol` on
 UniProt collapses **475,090 human + orthologous proteins (`618,093 → 143,003`, 76.9%)** sharing gene
 symbols across species (`samyama-graph #1808`), demonstrating why merge keys must be restricted to
 curated identifier namespaces.

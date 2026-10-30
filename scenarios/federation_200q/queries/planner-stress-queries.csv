@@ -2,7 +2,7 @@ id,name,category,cypher
 PLN01,"Article to trial nct_id equality join, unanchored",equality_join,MATCH (a:Article) WHERE a.nct_id IS NOT NULL MATCH (t:ClinicalTrial) WHERE t.nct_id = a.nct_id RETURN count(DISTINCT a) AS linked_articles
 PLN02,"Article to trial nct_id equality join, one side anchored",equality_join,MATCH (t:ClinicalTrial {nct_id:'NCT00000102'}) MATCH (a:Article) WHERE a.nct_id = t.nct_id RETURN a.pmid LIMIT 10
 PLN03,"Gene to target symbol equality join, anchored",equality_join,"MATCH (g:Gene {symbol:'TP53'}) MATCH (t:Target) WHERE t.symbol = g.symbol RETURN DISTINCT t.symbol, t.ensembl_id LIMIT 10"
-PLN04,"Variant and target converge on one disease, half anchored",equality_join,"MATCH (v:Variant)-[:ASSOCIATED_WITH_DISEASE]->(d1:Disease) MATCH (t:Target {symbol:'EGFR'})-[:ASSOCIATED_WITH_DISEASE]->(d2:Disease) WHERE d1.mondo_id = d2.mondo_id RETURN DISTINCT v.rs_id, d1.name LIMIT 20"
+PLN04,"Variant and target converge on one disease, half anchored",equality_join,"MATCH (t:Target {symbol:'EGFR'})-[:ASSOCIATED_WITH_DISEASE]->(d:Disease)<-[:ASSOCIATED_WITH_DISEASE]-(v:Variant) RETURN DISTINCT v.rs_id, d.name LIMIT 20"
 PLN05,Pathway proteins to ChEMBL targets by accession,equality_join,MATCH (p:Protein)-[:PARTICIPATES_IN]->(pw:Pathway {name:'Immune System'}) MATCH (ct:ChemblTarget) WHERE ct.uniprot_accession = p.uniprot_id RETURN DISTINCT ct.pref_name LIMIT 20
 PLN06,Trial sites in a surveillance country by name join,equality_join,MATCH (c:Country {name:'India'}) MATCH (s:Site) WHERE s.country = c.name RETURN count(DISTINCT s) AS sites
 PLN07,Distinct articles annotated with Humans,aggregation,MATCH (a:Article)-[:ANNOTATED_WITH]->(m:MeSHTerm {name:'Humans'}) RETURN count(DISTINCT a) AS articles

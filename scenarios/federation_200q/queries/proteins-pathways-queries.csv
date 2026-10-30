@@ -10,4 +10,4 @@ PTH01,Largest pathways by protein count,aggregation,"MATCH (prot:Protein)-[:PART
 PTH02,Most connected proteins (interaction hub),aggregation,"MATCH (p1:Protein)-[:INTERACTS_WITH]->(p2:Protein) RETURN p1.name, count(p2) AS interactions ORDER BY interactions DESC LIMIT 10"
 PTH03,Protein complexes,one_hop,"MATCH (p:Protein)-[:COMPONENT_OF]->(c:Complex) RETURN p.name, c.name LIMIT 10"
 PTH04,Pathway hierarchy (parent-child),one_hop,"MATCH (child:Pathway)-[:CHILD_OF]->(parent:Pathway) RETURN child.name, parent.name LIMIT 10"
-PTH05,Shared pathways between interacting proteins,two_hop,"MATCH (p1:Protein)-[:INTERACTS_WITH]->(p2:Protein) WHERE p1.name = 'TP53' WITH p2 LIMIT 1 MATCH (p2)-[:PARTICIPATES_IN]->(pw:Pathway) RETURN p2.name, pw.name LIMIT 10"
+PTH05,Shared pathways between interacting proteins,two_hop,"MATCH (p1:Protein {uniprot_id: 'P04637'})-[:INTERACTS_WITH]-(p2:Protein)-[:PARTICIPATES_IN]->(pw:Pathway) RETURN p2.uniprot_id, pw.name LIMIT 10"

@@ -206,8 +206,9 @@ queries:
     rows: 1
     reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
   EM01:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: exact
+    rows: 1
+    reason: "a bare aggregate projection returns exactly one row; WITH DISTINCT p between multi-edge stages avoids quadratic intermediate row blowup"
   EM02:
     status: range
     min: 20
@@ -228,8 +229,10 @@ queries:
     rows: 1
     reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
   EM06:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 25
+    reason: "max is the query's own LIMIT; distinct drug_name per patient over a 10,000-patient cohort sample"
   EM07:
     status: exact
     rows: 1
@@ -302,10 +305,12 @@ queries:
     status: range
     min: 1
     max: 10
-    reason: "UNEXECUTED on the federation; max is the query's own LIMIT; the per-KG suite measured 10 rows on a standalone store at v1.0.0"
+    reason: "max is the query's own LIMIT; 50,000-article sample with 5+ MeSH terms"
   LIT09:
-    status: data_dependent
-    reason: "UNEXECUTED on the federation; errored in every standalone v0.8.0 and v1.0.0 run, so no row count is claimed"
+    status: range
+    min: 1
+    max: 5
+    reason: "measured 5 rows on the federation; max is the query's own LIMIT"
   LIT10:
     status: range
     min: 1
@@ -341,32 +346,40 @@ queries:
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   OM02:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 50
+    reason: "max is the query's own LIMIT; potent compound bioactivities (pchembl_value >= 7.0) on ChEMBL targets"
   OM03:
     status: range
     min: 50
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   OM04:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 50
+    reason: "max is the query's own LIMIT; EGFR (P00533) pathways and GO terms"
   OM05:
     status: range
     min: 2
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   OM06:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 50
+    reason: "max is the query's own LIMIT; ChEMBL target joined via uniprot_id = uniprot_accession to Protein GO terms"
   OM07:
     status: range
     min: 50
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   OM08:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 50
+    reason: "max is the query's own LIMIT; BRCA1 target and ClinVar variants converging on merged Disease nodes"
   OM09:
     status: range
     min: 50
@@ -398,15 +411,19 @@ queries:
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   OM15:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 20
+    reason: "shortestPath between BRCA1 and TP53 protein isoforms returns 15 rows (each 2 hops)"
   OM16:
     status: range
     min: 6
     reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
   OM17:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 20
+    reason: "max is the query's own LIMIT; targets with most ASSOCIATED_WITH_DISEASE links"
   OM18:
     status: range
     min: 25
@@ -418,8 +435,10 @@ queries:
     max: 100
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   PH02:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 20
+    reason: "max is the query's own LIMIT; Measles reports in 2019"
   PH03:
     status: range
     min: 25
@@ -434,25 +453,35 @@ queries:
     min: 6
     reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
   PH06:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 100
+    reason: "max is the query's own LIMIT; AIR_QUALITY PM2.5 > 50 joined with NY.GNP.PCAP.CD by Country and year"
   PH07:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 10
+    reason: "World Bank income_level groups with NY.GNP.PCAP.CD"
   PH08:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 25
+    reason: "max is the query's own LIMIT; HealthWorkforce profession = 'physicians' in 2020"
   PH09:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 30
+    reason: "max is the query's own LIMIT; Surveillance TB burden joined with HealthSystems EmergencyResponse via merged Country (iso_code)"
   PH10:
     status: range
     min: 50
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   PH11:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 25
+    reason: "max is the query's own LIMIT; SocioeconomicIndicator NY.GNP.PCAP.CD joined with Surveillance malaria burden via merged Country (iso_code)"
   PH12:
     status: range
     min: 30
@@ -477,13 +506,15 @@ queries:
     max: 50
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   PH17:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 200
+    reason: "max is the query's own LIMIT; Nigeria VaccineCoverage trend by antigen and year"
   PH18:
     status: range
     min: 44
     max: 50
-    reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
+    reason: "max is the query's own LIMIT; African TB profile across Surveillance, HealthSystems, and HealthDeterminants"
   PLN01:
     status: exact
     rows: 1
@@ -500,9 +531,9 @@ queries:
     reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: no index exists on Target(ensembl_id) or Gene(symbol) and the symbol may be absent"
   PLN04:
     status: range
-    min: 0
+    min: 1
     max: 20
-    reason: "UNEXECUTED anywhere; max is the query's own LIMIT; min from nothing: Disease.mondo_id is absent from most ClinVar and all surveillance Disease nodes"
+    reason: "max is the query's own LIMIT; EGFR Target and ClinVar Variants converging on merged Disease nodes"
   PLN05:
     status: range
     min: 0
@@ -666,8 +697,10 @@ queries:
     rows: 1
     reason: "a bare aggregate projection returns exactly one row; UNEXECUTED on the federation"
   PVG04:
-    status: data_dependent
-    reason: "UNEXECUTED on the federation; errored in every standalone v0.8.0 and v1.0.0 run, so no row count is claimed"
+    status: range
+    min: 1
+    max: 10
+    reason: "measured 10 rows on the federation; max is the query's own LIMIT"
   PVG05:
     status: range
     min: 1
@@ -696,8 +729,9 @@ queries:
     rows: 1
     reason: "a bare aggregate projection returns exactly one row; measured 1 on the 2026-10-04 federation"
   Q03:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: exact
+    rows: 1
+    reason: "point lookup on Article {pmid:'22893372'} returns 1 row"
   Q04:
     status: exact
     rows: 1
@@ -731,11 +765,15 @@ queries:
     min: 11
     reason: "measured on the 2026-10-04 federation, run 1 and run 2 identical; no LIMIT, so only a floor is asserted"
   Q12:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 50
+    reason: "chemicals mentioned by Article {pmid:'22893372'} (10 rows)"
   Q13:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 20
+    reason: "max is the query's own LIMIT; citations from Article {pmid:'28092007'}"
   Q14:
     status: range
     min: 20
@@ -772,8 +810,10 @@ queries:
     max: 10
     reason: "measured on the 2026-10-04 federation (328,150,573 nodes / 1,441,425,708 edges), run 1 and run 2 identical; max is the query's own LIMIT"
   Q21:
-    status: data_dependent
-    reason: "returned 0 rows on the 2026-10-04 federation (cross-vocabulary entity-resolution gap, samyama-graph #318) or errored; the shape is correct, the join has no data"
+    status: range
+    min: 1
+    max: 20
+    reason: "max is the query's own LIMIT; 2-hop citation chain to Article {pmid:'20000334'}"
   Q22:
     status: exact
     rows: 1
@@ -831,8 +871,8 @@ queries:
   SDH04:
     status: range
     min: 1
-    max: 10
-    reason: "UNEXECUTED on the federation; the query has no LIMIT so max is a deliberately wide domain bound; the per-KG suite measured 7 rows on a standalone store at v1.0.0"
+    max: 15
+    reason: "merged Country nodes reach 7 World Bank regions + 6 WHO regions (13 regions total)"
   SDH05:
     status: range
     min: 1

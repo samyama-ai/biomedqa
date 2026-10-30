@@ -1,0 +1,315 @@
+Loaded oracle with 200 entries from "/home/ubuntu/bench/expected_rows.yaml"
+Importing HPO snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+19389 nodes, 23677 edges, 0 MERGED in 0.1s
+Importing MONDO snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+52611 nodes, 42566 edges, 0 MERGED in 0.2s
+Importing Health Systems snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+19661 nodes, 19428 edges, 0 MERGED in 0.1s
+Importing Pathways snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+138725 nodes, 601322 edges, 0 MERGED in 1.1s
+Importing Health Determinants snapshot (dedup)... [dedup] merged 210 of 285635 incoming nodes (0.1%)              into 210 group(s); largest group 2; by key: iso_code=210
+0 candidate merges refused for conflicting identifiers
+285425 nodes, 285628 edges, 210 MERGED in 0.8s
+Importing Surveillance snapshot (dedup)... [dedup] merged 233 of 56514 incoming nodes (0.4%)              into 233 group(s); largest group 2; by key: iso_code=233
+0 candidate merges refused for conflicting identifiers
+56281 nodes, 99286 edges, 233 MERGED in 0.2s
+Importing Drug Interactions snapshot (dedup)... [dedup] merged 8486 of 244783 incoming nodes (3.5%)              into 8486 group(s); largest group 2; by key: drugbank_id=8486
+0 candidate merges refused for conflicting identifiers
+236297 nodes, 387577 edges, 8486 MERGED in 1.1s
+Importing UniProt snapshot (dedup)... [dedup] merged 48994 of 618093 incoming nodes (7.9%)              into 48994 group(s); largest group 2; by key: go_id=28138 uniprot_id=20856
+0 candidate merges refused for conflicting identifiers
+569099 nodes, 3932727 edges, 48994 MERGED in 4.4s
+Importing OpenTargets snapshot (dedup)... [dedup] merged 4266 of 2834790 incoming nodes (0.2%)              into 3138 group(s); largest group 756; by key: mondo_id=2654 symbol=1612
+[dedup] note: largest group collapsed 756 records into one                  node. An entity identifier normally merges pairs; a group this size means one                  value is shared by 756 records.
+0 candidate merges refused for conflicting identifiers
+2830524 nodes, 8251442 edges, 4266 MERGED in 8.8s
+Importing ChEMBL snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+5240232 nodes, 5637712 edges, 0 MERGED in 11.8s
+Importing Clinical Trials snapshot (dedup)... [dedup] merged 5256 of 7779702 incoming nodes (0.1%)              into 5256 group(s); largest group 2; by key: drugbank_id=5256
+0 candidate merges refused for conflicting identifiers
+7774446 nodes, 26980360 edges, 5256 MERGED in 79.8s
+Importing FAERS snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+10365423 nodes, 89908096 edges, 0 MERGED in 244.5s
+Importing ClinVar snapshot (dedup)... [dedup] merged 27170 of 31754327 incoming nodes (0.1%)              into 27170 group(s); largest group 2; by key: symbol=18600 mondo_id=8570
+0 candidate merges refused for conflicting identifiers
+31727157 nodes, 26347673 edges, 27170 MERGED in 95.3s
+Importing EdTech snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+1098 nodes, 1287 edges, 0 MERGED in 0.0s
+Importing EdgeAI snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+25152 nodes, 76306 edges, 0 MERGED in 0.7s
+Importing RegulatoryAffairs snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+28606 nodes, 25414 edges, 0 MERGED in 0.2s
+Importing SIDER snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+7298 nodes, 139756 edges, 0 MERGED in 0.2s
+Importing GO-GOA snapshot (dedup)... [dedup] merged 38339 of 77479 incoming nodes (49.5%)              into 38308 group(s); largest group 5; by key: go_id=38236 symbol=103
+[dedup] WARNING: 49.5% of this source merged away, above the                  20% a well-identified corpus would show. Most merges                  came from 'go_id' (38236 merges). If that key is not an entity identifier -- a gene symbol, a                  display name -- it is collapsing distinct entities, and a larger merge count is                  the symptom, not the result. Re-run with identifier keys only to compare.
+[dedup] note: largest group collapsed 5 records into one                  node. An entity identifier normally merges pairs; a group this size means one                  value is shared by 5 records.
+0 candidate merges refused for conflicting identifiers
+39140 nodes, 946551 edges, 38339 MERGED in 1.0s
+Importing MentalHealth snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+113710 nodes, 1665153 edges, 0 MERGED in 1.5s
+Importing UMLS snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+9814998 nodes, 30883429 edges, 0 MERGED in 43.0s
+Importing OMOP-115k snapshot (dedup)... 0 candidate merges refused for conflicting identifiers
+51902974 nodes, 54492437 edges, 0 MERGED in 166.8s
+Importing PubMed snapshot... 66160185 nodes, 1043607780 edges in 850.1s
+Importing OMOP snapshot... 140721864 nodes, 147070126 edges in 602.4s
+[compact] Frozen: 1441425733 edges (1 segments, 328130296 nodes). Buffer: 0 edges.
+
+All data loaded in 2228.9s
+Setting nct_id on Articles from study_references.txt...
+  39994988 Articles with pmid indexed
+  1018483 articles tagged with nct_id in 11.9s
+Building NCT bridge (Article → ClinicalTrial)...
+  575778 ClinicalTrial nodes with nct_id
+  747505 REFERENCED_IN edges created in 3.4s
+Creating indexes...
+  43 indexes created in 137.6s
+
+Query files considered:
+  clinical-trials-aact-queries.csv: 5 queries
+  cross-kg-bridge-queries.csv: 3 queries
+  drug-interaction-queries.csv: 5 queries
+  ehr-omop-queries.csv: 8 queries
+  emr-clinical-complex-queries.csv: 20 queries
+  literature-complex-queries.csv: 10 queries
+  new-kg-queries.csv: 35 queries
+  omics-complex-queries.csv: 18 queries
+  pharmacovigilance-queries.csv: 8 queries
+  planner-stress-queries.csv: 24 queries
+  proteins-pathways-queries.csv: 12 queries
+  public-health-complex-queries.csv: 18 queries
+  public-health-determinants-queries.csv: 9 queries
+  federation-queries.csv: 25 queries
+14 files considered, 200 queries loaded, 0 rows skipped
+
+Running 200 queries...
+
+  PASS TRI01: 15 rows in 534.5ms [Trials per country]
+  PASS TRI02: 10 rows in 38.9ms [Top sponsors]
+  PASS TRI03: 10 rows in 677.2ms [Sites running the most trials]
+  PASS TRI04: 10 rows in 1199.9ms [Condition → Intervention → AE chain]
+  PASS TRI05: 10 rows in 222.9ms [Multi-arm trials with adverse events]
+  PASS XKG01: 10 rows in 133.7ms [Chemical → Article → Trial → Sponsor]
+  PASS XKG02: 10 rows in 518.4ms [MeSH → Article → Trial → Outcome]
+  PASS XKG03: 4 rows in 36.9ms [6KG: poverty → disease burden correlation]
+  PASS DDI01: 10 rows in 1.1ms [Drugs with most side effects]
+  PASS DDI02: 10 rows in 11.1ms [Drugs sharing a gene target]
+  PASS DDI03: 10 rows in 0.2ms [Side effects shared between two drugs]
+  PASS DDI04: 10 rows in 2.7ms [Genes targeted by most drugs]
+  PASS DDI05: 10 rows in 16.0ms [Drugs with both gene targets and adverse events]
+  PASS EHR01: 2 rows in 192.1ms [Gender distribution]
+  PASS EHR02: 2 rows in 179.9ms [State distribution]
+  PASS EHR03: 15 rows in 14234.3ms [Visit class distribution]
+  PASS EHR04: 1 rows in 3631.4ms [Comorbidity pairs]
+  PASS EHR05: 10 rows in 4889.4ms [Expensive visits]
+  PASS EHR06: 1 rows in 3567.3ms [Patient journey length]
+  PASS EHR07: 3 rows in 12210.4ms [Ambulatory vs inpatient]
+  PASS EHR08: 1 rows in 7988.5ms [Polypharmacy patients (5+ drugs)]
+  PASS EM01: 1 rows in 12165.7ms [Diabetes+Metformin+HbA1c cohort]
+  PASS EM02: 20 rows in 6425.7ms [Inpatient condition care pathway]
+  PASS EM03: 5 rows in 6870.2ms [Drug prescribed for diagnosed condition]
+  PASS EM04: 25 rows in 4873.0ms [Top conditions by patient count]
+  PASS EM05: 1 rows in 4055.4ms [Diabetes-hypertension-CKD triple comorbidity]
+  PASS EM06: 25 rows in 1379.9ms [Global co-prescription drug pairs]
+  PASS EM07: 1 rows in 26667.5ms [Uncontrolled diabetics by lab value]
+  PASS EM08: 1 rows in 3894.2ms [Treatment started after diagnosis]
+  PASS CT01: 11 rows in 158.6ms [Diabetes trials by phase]
+  PASS CT02: 20 rows in 107.9ms [Drug interventions by trial count]
+  PASS CT03: 20 rows in 276.8ms [Industry phase-3 diabetes sponsors]
+  PASS CT04: 20 rows in 321.9ms [Arm-intervention-drug pathway]
+  PASS CT05: 20 rows in 223.9ms [Terminated trials with adverse events]
+  PASS CT06: 30 rows in 111.0ms [Most-studied conditions globally]
+  PASS CX01: 1 rows in 3756.3ms [EMR condition prevalence vs trial coverage]
+  PASS CX02: 20 rows in 865.4ms [Trial drugs by PubMed evidence]
+  PASS CX03: 20 rows in 4977.3ms [Patient drug exposure vs FAERS events]
+  PASS CX04: 20 rows in 3788.3ms [EMR condition to trial drug to FAERS chain]
+  PASS CX05: 25 rows in 214.2ms [Trials to PubMed MeSH co-occurrence]
+  PASS CX06: 1 rows in 5742.6ms [EMR drug to trial to PubMed evidence]
+  PASS LIT01: 10 rows in 2539.6ms [Articles by year]
+  PASS LIT02: 10 rows in 0.3ms [Citation chain (who cites my citers)]
+  PASS LIT03: 10 rows in 1485.3ms [MeSH co-occurrence (Neoplasms)]
+  PASS LIT04: 10 rows in 0.6ms [Author collaboration network]
+  PASS LIT05: 18 rows in 31.2ms [Publication trend by year for a MeSH term]
+  PASS LIT06: 10 rows in 7.4ms [Articles with both MeSH and Chemical annotations]
+  PASS LIT07: 10 rows in 6895.8ms [MeSH terms for NIH-funded articles]
+  PASS LIT08: 10 rows in 250.8ms [Multi-MeSH article (articles with 5+ MeSH terms)]
+  PASS LIT09: 5 rows in 141.2ms [Author collaboration (multi-authored articles)]
+  PASS LIT10: 10 rows in 27.7ms [Chemical → Journal pathway]
+  PASS UML01: 1 rows in 776.4ms [UMLS concept by CUI]
+  PASS UML02: 20 rows in 0.2ms [UMLS semantic type distribution]
+  PASS UML03: 25 rows in 4648.4ms [UMLS atoms per source vocabulary]
+  PASS UML04: 10 rows in 3993.0ms [UMLS concepts with the most distinct synonyms]
+  PASS UML05: 1 rows in 716.7ms [UMLS related-concept degree (undirected)]
+  PASS SDR01: 1 rows in 45.6ms [SIDER drug count by stitch_id]
+  PASS SDR02: 15 rows in 41.7ms [SIDER drugs with the most side effects]
+  PASS SDR03: 20 rows in 6.1ms [SIDER side effects carrying a UMLS CUI]
+  PASS SDR04: 3 rows in 9.9ms [SIDER commonest side effects across drugs]
+  PASS SDR05: 1 rows in 1462.9ms [SIDER side effect to UMLS concept value join]
+  PASS GOA01: 1 rows in 0.2ms [GO term by GO id]
+  PASS GOA02: 3 rows in 27.5ms [GO namespace distribution]
+  PASS GOA03: 20 rows in 56.8ms [GOA most-annotated GO terms]
+  PASS GOA04: 0 rows in 0.2ms [GO PART_OF ancestors, variable length]
+  PASS GOA05: 10 rows in 153.7ms [GOA proteins by molecular-function term count]
+  PASS MNH01: 1 rows in 0.1ms [Mental-health facility count]
+  PASS MNH02: 0 rows in 25.5ms [California mental-health providers by taxonomy]
+  PASS MNH03: 25 rows in 15.0ms [Worst HPSA shortage areas by score]
+  PASS MNH04: 20 rows in 25.4ms [Mental-health facilities per state]
+  PASS MNH05: 2 rows in 13.9ms [Elderly mental-health cohort by gender]
+  PASS REG01: 1 rows in 0.1ms [FDA 510(k) submission count]
+  PASS REG02: 11 rows in 22.3ms [Submissions by decision code]
+  PASS REG03: 6 rows in 14.7ms [Product codes by device class]
+  PASS REG04: 15 rows in 15.6ms [CFR sections per regulation part]
+  PASS REG05: 1 rows in 27.1ms [Submission to product code value join on device name]
+  PASS EAI01: 20 rows in 12.3ms [Edge boards above 256 KB RAM]
+  PASS EAI02: 15 rows in 10.4ms [Deployments per board with mean latency]
+  PASS EAI03: 20 rows in 10.6ms [Kernels implementing each ONNX operator]
+  PASS EAI04: 14 rows in 10.3ms [Signal-stage pipeline reachability, variable length]
+  PASS EAI05: 50 rows in 13.1ms [Board SoC with optional accelerator]
+  PASS EDU01: 20 rows in 0.1ms [Courses per subject]
+  PASS EDU02: 15 rows in 8.6ms [Courses with the most prerequisites]
+  PASS EDU03: 10 rows in 5.6ms [Transitive prerequisite closure, variable length]
+  PASS EDU04: 20 rows in 7.4ms [Courses included in each pathway]
+  PASS EDU05: 20 rows in 15.8ms [Subjects with optional course requirements]
+  PASS OM01: 18 rows in 0.9ms [TP53 interactome to pathways]
+  PASS OM02: 50 rows in 1793.5ms [Potent compound bioactivities on ChEMBL targets]
+  PASS OM03: 50 rows in 139.9ms [Pathogenic BRCA1 variants and diseases]
+  PASS OM04: 50 rows in 5.4ms [Pathway proteins and GO annotations]
+  PASS OM05: 2 rows in 159.6ms [ChEMBL compound vs OpenTargets drug targets]
+  PASS OM06: 50 rows in 2472.5ms [Bioactive ChEMBL target GO annotations]
+  PASS OM07: 50 rows in 811.7ms [Pathogenic variant genes to target-disease evidence]
+  PASS OM08: 50 rows in 7.0ms [Variant and target evidence converging on merged diseases]
+  PASS OM09: 50 rows in 549.2ms [Druggable EGFR variant genes]
+  PASS OM10: 20 rows in 1648.7ms [Compounds per target top-N]
+  PASS OM11: 25 rows in 2956.0ms [Variants per gene by clinical significance]
+  PASS OM12: 25 rows in 214.2ms [Most-connected proteins by interaction degree]
+  PASS OM13: 25 rows in 7.3ms [Top pathways by protein count]
+  PASS OM14: 13 rows in 0.2ms [DNA-repair GO term ancestry]
+  PASS OM15: 15 rows in 0.5ms [Shortest interaction path BRCA1 to TP53]
+  PASS OM16: 6 rows in 14.5ms [BRCA1 variant significance breakdown]
+  PASS OM17: 20 rows in 97.1ms [Targets with most disease associations]
+  PASS OM18: 25 rows in 39.5ms [Top biological-process GO terms by protein count]
+  PASS PVG01: 15 rows in 6.1ms [Top adverse reactions]
+  PASS PVG02: 10 rows in 17.7ms [Drug reaction pairs]
+  PASS PVG03: 1 rows in 2677.2ms [Elderly cases (age > 65)]
+  PASS PVG04: 1 rows in 10666.7ms [Drugs with most reactions]
+  PASS PVG05: 10 rows in 70.5ms [Hepatotoxicity drugs]
+  PASS PVG06: 10 rows in 19.2ms [QT prolongation drugs]
+  PASS PVG07: 1 rows in 30912.2ms [Polypharmacy cases (5+ drugs)]
+  PASS PVG08: 10 rows in 23.0ms [Serious reaction - death]
+  PASS PLN01: 1 rows in 7341.5ms [Article to trial nct_id equality join, unanchored]
+  PASS PLN02: 0 rows in 14385.4ms [Article to trial nct_id equality join, one side anchored]
+  PASS PLN03: 1 rows in 37.2ms [Gene to target symbol equality join, anchored]
+  PASS PLN04: 20 rows in 6.6ms [Variant and target converge on one disease, half anchored]
+  PASS PLN05: 20 rows in 115.5ms [Pathway proteins to ChEMBL targets by accession]
+  PASS PLN06: 1 rows in 627.0ms [Trial sites in a surveillance country by name join]
+  PASS PLN07: 1 rows in 4673.2ms [Distinct articles annotated with Humans]
+  PASS PLN08: 1 rows in 6880.8ms [Two distinct counts in one projection]
+  PASS PLN09: 1 rows in 335.5ms [Distinct trial condition names]
+  PASS PLN10: 10 rows in 54136.7ms [Distinct authors per journal, ordered by the aggregate alias]
+  PASS PLN11: 44 rows in 0.2ms [Article with optional MeSH and optional chemical]
+  PASS PLN12: 1 rows in 0.1ms [Trial with optional adverse events and outcomes]
+  PASS PLN13: 366 rows in 10499.3ms [Optional grant for machine-learning articles (nulls expected)]
+  PASS PLN14: 100 rows in 0.3ms [Protein with optional pathway and optional GO term]
+  PASS PLN15: 1 rows in 0.1ms [Citation closure to depth 3 from one article]
+  PASS PLN16: 1 rows in 28.3ms [Second-shell interaction partners of TP53]
+  PASS PLN17: 1 rows in 17.8ms [GO descendants of biological_process to depth 3]
+  PASS PLN18: 10 rows in 98.9ms [Disease ontology ancestors, variable length, grouped]
+  PASS PLN19: 10 rows in 35.1ms [Articles per MeSH term under a prefix filter]
+  PASS PLN20: 10 rows in 16.1ms [Articles per journal under a substring filter]
+  PASS PLN21: 10 rows in 100.2ms [Articles per chemical under a prefix filter]
+  PASS PLN22: 1 rows in 1.4ms [Undirected citation neighbourhood of one article]
+  PASS PLN23: 1 rows in 0.1ms [Undirected interaction degree of BRCA1]
+  PASS PLN24: 10 rows in 217.9ms [Co-authors of the most prolific author, undirected]
+  PASS PRO01: 10 rows in 8.1ms [Proteins per organism top 10]
+  PASS PRO02: 10 rows in 89.2ms [Longest proteins]
+  PASS PRO03: 1 rows in 182.9ms [Proteins with EC number]
+  PASS PRO04: 10 rows in 7.8ms [Multi-gene proteins]
+  PASS PRO05: 5 rows in 2127.7ms [Protein with most GO terms]
+  PASS PRO06: 1 rows in 1508.1ms [Average GO terms per protein]
+  PASS PRO07: 1 rows in 15.6ms [Proteins shared between organisms]
+  PASS PTH01: 10 rows in 0.7ms [Largest pathways by protein count]
+  PASS PTH02: 10 rows in 5.5ms [Most connected proteins (interaction hub)]
+  PASS PTH03: 10 rows in 8.3ms [Protein complexes]
+  PASS PTH04: 10 rows in 5.0ms [Pathway hierarchy (parent-child)]
+  PASS PTH05: 10 rows in 0.3ms [Shared pathways between interacting proteins]
+  PASS PH01: 100 rows in 18.3ms [Diseases reported in Africa region]
+  PASS PH02: 20 rows in 19.2ms [Top-20 countries by yellow fever reports 2019]
+  PASS PH03: 25 rows in 0.4ms [India tuberculosis trend over time]
+  PASS PH04: 2 rows in 13.1ms [DTP3 vaccine coverage gaps below 50pct]
+  PASS PH05: 13 rows in 14.0ms [MCV1 coverage by WHO region 2021]
+  PASS PH06: 100 rows in 75.8ms [High PM2.5 cities vs national GNI per capita]
+  PASS PH07: 5 rows in 17.8ms [Average GNI per capita grouped by income level]
+  PASS PH08: 25 rows in 11.2ms [Lowest doctor density countries 2020]
+  PASS PH09: 30 rows in 30.6ms [TB burden vs emergency response capacity]
+  PASS PH10: 50 rows in 8674.0ms [India surveilled diseases vs clinical trials]
+  PASS PH11: 25 rows in 44.5ms [Economic indicators vs reported cholera burden]
+  PASS PH12: 30 rows in 276.6ms [HIV clinical trials in African countries]
+  PASS PH13: 25 rows in 256.7ms [TB literature by journal]
+  PASS PH14: 11 rows in 36.1ms [Global disease report totals per disease]
+  PASS PH15: 77 rows in 24.8ms [Global disease reports per year]
+  PASS PH16: 50 rows in 1402.3ms [Water stress vs undernutrition per country]
+  PASS PH17: 52 rows in 0.2ms [Nigeria vaccine coverage trend by antigen]
+  PASS PH18: 44 rows in 46.2ms [African TB federated profile across Surveillance HealthSystems and Determinants]
+  PASS SDH01: 5 rows in 5.4ms [India poverty rate trend]
+  PASS SDH02: 11 rows in 4.1ms [India all indicators for 2022]
+  PASS SDH03: 10 rows in 24.2ms [Poverty vs life expectancy (cross-indicator)]
+  PASS SDH04: 13 rows in 16.5ms [Regional average GNI per capita]
+  PASS SDH05: 10 rows in 10.9ms [Health Determinants: Gini inequality top 10]
+  PASS SYS01: 10 rows in 10.9ms [Top 10 countries by surveillance capacity]
+  PASS SYS02: 3 rows in 0.2ms [India SPAR trend over years]
+  PASS SYS03: 10 rows in 10.6ms [Capacity gap: risk communication below 40]
+  PASS SYS04: 10 rows in 10.1ms [Health Systems: workforce density top physicians]
+  PASS Q01: 1 rows in 0.1ms [Article by pmid 1]
+  PASS Q02: 1 rows in 0.0ms [Article by pmid 1000000]
+  PASS Q03: 1 rows in 0.0ms [Article by pmid 22893372]
+  PASS Q04: 1 rows in 0.0ms [Count articles]
+  PASS Q05: 1 rows in 0.0ms [Count authors]
+  PASS Q06: 1 rows in 0.0ms [Count MeSH terms]
+  PASS Q07: 1 rows in 0.0ms [Count chemicals]
+  PASS Q08: 1 rows in 0.0ms [Count CITES edges]
+  PASS Q09: 1 rows in 0.0ms [Count ANNOTATED_WITH edges]
+  PASS Q10: 3 rows in 0.0ms [Authors of pmid 1000000]
+  PASS Q11: 11 rows in 0.0ms [MeSH of pmid 1000000]
+  PASS Q12: 1 rows in 0.0ms [Chemicals of pmid 22893372]
+  PASS Q13: 19 rows in 0.1ms [Citations from pmid 28092007]
+  PASS Q14: 20 rows in 0.1ms [Co-authored articles via shared author]
+  PASS Q15: 20 rows in 163.0ms [Co-annotated articles via MeSH]
+  PASS Q16: 10 rows in 15.8ms [Article count per journal]
+  PASS Q17: 10 rows in 14.1ms [Top MeSH by article count]
+  PASS Q18: 10 rows in 136.7ms [Top chemicals mentioned]
+  PASS Q19: 10 rows in 13348.6ms [Most-cited articles]
+  PASS Q20: 10 rows in 14222.2ms [Most prolific authors]
+  PASS Q21: 20 rows in 0.3ms [2-hop citation chain to pmid 20000334]
+  PASS Q22: 1 rows in 0.1ms [Count ClinicalTrial nodes]
+  PASS Q23: 1 rows in 0.0ms [Count Protein nodes]
+  PASS Q24: 1 rows in 269.5ms [Article-ClinicalTrial links]
+  PASS Q25: 1 rows in 3219.3ms [Grant-funded articles count]
+
+========================================
+Results: 200/200 pass (200 full + 0 data_gap), 0 empty, 0 fail_count, 0 error
+Total time: 2744.4s
+========================================
+	Command being timed: "./target/release/examples/unified_benchmark --pubmed-snap /home/ubuntu/snaps/pubmed-v3.sgsnap --omop-snap /home/ubuntu/snaps/omop-180k.sgsnap --ct-snap /home/ubuntu/snaps/clinical-trials.sgsnap --faers-snap /home/ubuntu/snaps/faers-full.sgsnap --clinvar-snap /home/ubuntu/snaps/clinvar_dbsnp.sgsnap --chembl-snap /home/ubuntu/snaps/chembl.sgsnap --opentargets-snap /home/ubuntu/snaps/opentargets.sgsnap --uniprot-snap /home/ubuntu/snaps/uniprot.sgsnap --hpo-snap /home/ubuntu/snaps/hpo.sgsnap --mondo-snap /home/ubuntu/snaps/mondo.sgsnap --pw-snap /home/ubuntu/snaps/pathways-hf.sgsnap --di-snap /home/ubuntu/snaps/druginteractions.sgsnap --surv-snap /home/ubuntu/snaps/surveillance.sgsnap --hd-snap /home/ubuntu/snaps/health-determinants-local.sgsnap --hs-snap /home/ubuntu/snaps/health-systems.sgsnap --extra-snap EdTech=/home/ubuntu/snaps/edtech-hf.sgsnap --extra-snap EdgeAI=/home/ubuntu/snaps/edge-ai-hf.sgsnap --extra-snap RegulatoryAffairs=/home/ubuntu/snaps/regulatory-affairs.sgsnap --extra-snap SIDER=/home/ubuntu/snaps/sider.sgsnap --extra-snap GO-GOA=/home/ubuntu/snaps/go_goa.sgsnap --extra-snap MentalHealth=/home/ubuntu/snaps/mental-health-full.sgsnap --extra-snap UMLS=/home/ubuntu/snaps/umls.sgsnap --extra-snap OMOP-115k=/home/ubuntu/snaps/omop-115k.sgsnap --dedup-keys mondo_id,uniprot_id,go_id,drugbank_id,symbol,iso_code --study-refs /home/ubuntu/study_references.txt --queries /home/ubuntu/bench/queries --queries /home/ubuntu/bench/federation-queries.csv --oracle /home/ubuntu/bench/expected_rows.yaml"
+	User time (seconds): 3622.43
+	System time (seconds): 119.37
+	Percent of CPU this job got: 133%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 46:42.33
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 366529928
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 21844888
+	Voluntary context switches: 61190
+	Involuntary context switches: 18998
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 296
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0
