@@ -169,9 +169,8 @@ GPT-4o is the strongest available baseline. If GPT-4o can't beat MCP tools, weak
 ## Papers
 
 This benchmark is used in:
-- **[arXiv:2603.15080](https://arxiv.org/abs/2603.15080)** — Open Biomedical Knowledge Graphs at Scale
-- **GRADES-NDA 2026** (SIGMOD workshop) — Federated Biomedical Knowledge Graphs
-- **aiDM 2026** (SIGMOD workshop) — Domain-Specific MCP Tools vs. Generic Text-to-Cypher
+- **[arXiv:2603.15080](https://arxiv.org/abs/2603.15080)** — *Open Biomedical Knowledge Graphs at Scale: Construction, Federation, and AI Agent Access with Samyama Graph Database*
+- **ACM IKDD CODS 2026 (AI for Biology Track, non-archival flash talk & poster)** — *Typed Knowledge-Graph Tools Give LLM Agents Reliable Access to Merged Biomedical Knowledge Graphs*
 
 ## Beyond the benchmark: a 328.1M-node corpus
 
